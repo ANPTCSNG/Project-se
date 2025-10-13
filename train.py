@@ -22,3 +22,5 @@ model.fit(X_train, y_train)
 # เซฟโมเดล
 joblib.dump(model, "model.pkl")
 print("✅ model.pkl + feature_columns.pkl saved")
+
+#คำสั่ง powershell : python train.py

@@ -70,17 +70,17 @@ except FileNotFoundError:
 
 # --- MongoDB Setup ---
 # **สำคัญ:** กรุณาแทนที่ MONGO_URI ด้วย Connection String ของ MongoDB Atlas หรือ Local
-MONGO_URI = "mongodb+srv://admin:ojchabeam@cluster0.ukg4jrr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-DB_NAME = "house_price_db"
+MONGO_URI = "mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
+DB_NAME = "house_price_app"
 
 
 try:
-    client = MongoClient(MONGO_URI)
-    db = client[DB_NAME]
-    users_collection = db['users']
+    client = MongoClient("mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1")
+    db = client["house_price_app"]
+    users = db["users"]
     predictions_collection = db['predictions']
     # สร้าง index เพื่อให้ username ไม่ซ้ำกัน (unique)
-    users_collection.create_index([("username", 1)], unique=True)
+    users.create_index([("username", 1)], unique=True)
     print("MongoDB connected and collections initialized.")
 except Exception as e:
     print(f"ERROR: Could not connect to MongoDB. Check your MONGO_URI. {e}")
@@ -136,7 +136,7 @@ def register(user_data: UserRegistration):
     """Endpoint สำหรับการลงทะเบียนผู้ใช้ใหม่"""
     try:
         # 1. เช็คว่ามี username นี้อยู่แล้วหรือไม่
-        if users_collection.find_one({"username": user_data.username}):
+        if users.find_one({"username": user_data.username}):
             raise HTTPException(status_code=400, detail="Username already exists")
 
         # 2. เข้ารหัสรหัสผ่าน
@@ -149,7 +149,7 @@ def register(user_data: UserRegistration):
             "email": user_data.email,
             "created_at": datetime.utcnow()
         }
-        users_collection.insert_one(user_doc)
+        users.insert_one(user_doc)
         
         return {"message": "User registered successfully", "username": user_data.username}
     except HTTPException:
@@ -164,7 +164,7 @@ def register(user_data: UserRegistration):
 @app.post("/login")
 def login(login_data: UserLogin):
     """Endpoint สำหรับการเข้าสู่ระบบ"""
-    user = users_collection.find_one({"username": login_data.username})
+    user = users.find_one({"username": login_data.username})
     
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password")
@@ -191,7 +191,7 @@ def predict_price(features: HouseFeatures):
     try:
         # 1. ตรวจสอบ User ID (จำลองการตรวจสอบสิทธิ์)
         user_id_obj = ObjectId(features.user_id)
-        user_check = users_collection.find_one({"_id": user_id_obj})
+        user_check = users.find_one({"_id": user_id_obj})
         if not user_check:
             raise HTTPException(status_code=404, detail="User ID not found or invalid.")
 

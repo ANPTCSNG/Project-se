@@ -1,0 +1,234 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-th="ค้นหาบ้านในฝัน" data-en="Find Your Dream Home">ค้นหาบ้านในฝัน</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        nav {
+            width: 100%;
+            padding: 1rem;
+            background: #6b48ff;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        nav a, nav select {
+            margin-left: 1rem;
+            color: black;
+            text-decoration: none;
+            background: white;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 60px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .input-group label {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .input-group input, .input-group select {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            height: 2.5rem;
+            box-sizing: border-box;
+        }
+        .error {
+            font-size: 0.8rem;
+            color: red;
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .input-group label {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
+        <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
+        <select id="languageSelector">
+            <option value="th">ไทย</option>
+            <option value="en">English</option>
+        </select>
+    </nav>
+    <div class="search-container">
+        <h2 data-th="ค้นหาบ้านในฝัน" data-en="Find Your Dream Home">ค้นหาบ้านในฝัน</h2>
+        <form id="searchForm">
+            <div class="form-grid">
+                <!-- คอลัมน์ 1: หัวข้อ 1-5 -->
+                <div>
+                    <div class="input-group">
+                        <label for="overallQual" data-th="คุณภาพโดยรวม (1-10)" data-en="Overall Quality (1-10)">คุณภาพโดยรวม (1-10)</label>
+                        <input type="number" id="overallQual" name="overallQual" min="1" max="10">
+                        <div id="overallQualError" class="error" data-th="คุณภาพโดยรวมต้องอยู่ระหว่าง 1-10" data-en="Overall quality must be between 1-10">คุณภาพโดยรวมต้องอยู่ระหว่าง 1-10</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="grLivArea" data-th="พท.อยู่อาศัยเหนือพื้นดิน" data-en="Living Area Above (sq ft)">พท.อยู่อาศัยเหนือพื้นดิน</label>
+                        <input type="number" id="grLivArea" name="grLivArea" min="0">
+                        <div id="grLivAreaError" class="error" data-th="พื้นที่ต้องเป็นตัวเลขไม่ติดลบ" data-en="Area must be positive">พื้นที่ต้องเป็นตัวเลขไม่ติดลบ</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="totalBsmtSF" data-th="พท.ชั้นใต้ดินทั้งหมด" data-en="Total Basement Area (sq ft)">พท.ชั้นใต้ดินทั้งหมด</label>
+                        <input type="number" id="totalBsmtSF" name="totalBsmtSF" min="0">
+                        <div id="totalBsmtSFError" class="error" data-th="พื้นที่ต้องเป็นตัวเลขไม่ติดลบ" data-en="Area must be positive">พื้นที่ต้องเป็นตัวเลขไม่ติดลบ</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="1stFlrSF" data-th="พท.ชั้นหนึ่ง" data-en="1st Floor Area (sq ft)">พท.ชั้นหนึ่ง</label>
+                        <input type="number" id="1stFlrSF" name="1stFlrSF" min="0">
+                        <div id="1stFlrSFError" class="error" data-th="พื้นที่ต้องเป็นตัวเลขไม่ติดลบ" data-en="Area must be positive">พื้นที่ต้องเป็นตัวเลขไม่ติดลบ</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="2ndFlrSF" data-th="พท.ชั้นสอง" data-en="2nd Floor Area (sq ft)">พท.ชั้นสอง</label>
+                        <input type="number" id="2ndFlrSF" name="2ndFlrSF" min="0">
+                        <div id="2ndFlrSFError" class="error" data-th="พื้นที่ต้องเป็นตัวเลขไม่ติดลบ" data-en="Area must be positive">พื้นที่ต้องเป็นตัวเลขไม่ติดลบ</div>
+                    </div>
+                </div>
+                <!-- คอลัมน์ 2: หัวข้อ 6-10 -->
+                <div>
+                    <div class="input-group">
+                        <label for="garageCars" data-th="ความจุโรงรถ" data-en="Garage Capacity (cars)">ความจุโรงรถ</label>
+                        <input type="number" id="garageCars" name="garageCars" min="0">
+                        <div id="garageCarsError" class="error" data-th="จำนวนรถต้องไม่ติดลบ" data-en="Number of cars must be non-negative">จำนวนรถต้องไม่ติดลบ</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="yearBuilt" data-th="ปีที่สร้าง" data-en="Year Built">ปีที่สร้าง</label>
+                        <input type="number" id="yearBuilt" name="yearBuilt" min="1800" max="2025">
+                        <div id="yearBuiltError" class="error" data-th="ปีที่สร้างต้องอยู่ระหว่าง 1800-2025" data-en="Year built must be between 1800-2025">ปีที่สร้างต้องอยู่ระหว่าง 1800-2025</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="yearRemodAdd" data-th="ปีที่ปรับปรุง" data-en="Year Remodeled">ปีที่ปรับปรุง</label>
+                        <input type="number" id="yearRemodAdd" name="yearRemodAdd" min="1800" max="2025">
+                        <div id="yearRemodAddError" class="error" data-th="ปีที่ปรับปรุงต้องอยู่ระหว่าง 1800-2025" data-en="Year remodeled must be between 1800-2025">ปีที่ปรับปรุงต้องอยู่ระหว่าง 1800-2025</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="fullBath" data-th="จำนวนห้องน้ำ" data-en="Number of Full Baths">จำนวนห้องน้ำ</label>
+                        <input type="number" id="fullBath" name="fullBath" min="0">
+                        <div id="fullBathError" class="error" data-th="จำนวนห้องน้ำต้องไม่ติดลบ" data-en="Number of baths must be non-negative">จำนวนห้องน้ำต้องไม่ติดลบ</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="bsmtQual" data-th="คุณภาพชั้นใต้ดิน" data-en="Basement Quality">คุณภาพชั้นใต้ดิน</label>
+                        <select id="bsmtQual" name="bsmtQual">
+                            <option value="">เลือก</option>
+                            <option value="Ex" data-th="ดีเยี่ยม" data-en="Excellent">ดีเยี่ยม</option>
+                            <option value="Gd" data-th="ดี" data-en="Good">ดี</option>
+                            <option value="TA" data-th="ปานกลาง" data-en="Average">ปานกลาง</option>
+                            <option value="Fa" data-th="แย่" data-en="Fair">แย่</option>
+                            <option value="Po" data-th="แย่มาก" data-en="Poor">แย่มาก</option>
+                            <option value="None" data-th="ไม่มีชั้นใต้ดิน" data-en="No Basement">ไม่มีชั้นใต้ดิน</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- คอลัมน์ 3: หัวข้อ 11-15 -->
+                <div>
+                    <div class="input-group">
+                        <label for="kitchenQual" data-th="คุณภาพห้องครัว" data-en="Kitchen Quality">คุณภาพห้องครัว</label>
+                        <select id="kitchenQual" name="kitchenQual">
+                            <option value="">เลือก</option>
+                            <option value="Ex" data-th="ดีเยี่ยม" data-en="Excellent">ดีเยี่ยม</option>
+                            <option value="Gd" data-th="ดี" data-en="Good">ดี</option>
+                            <option value="TA" data-th="ปานกลาง" data-en="Average">ปานกลาง</option>
+                            <option value="Fa" data-th="แย่" data-en="Fair">แย่</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="neighborhood" data-th="ย่านที่ตั้ง" data-en="Neighborhood">ย่านที่ตั้ง</label>
+                        <select id="neighborhood" name="neighborhood">
+                            <option value="">เลือก</option>
+                            <option value="Blmngtn" data-th="Bloomington Heights" data-en="Bloomington Heights">Bloomington Heights</option>
+                            <option value="Blueste" data-th="Bluestem" data-en="Bluestem">Bluestem</option>
+                            <!-- เพิ่มตัวเลือกอื่นๆ ตามเดิม -->
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="lotArea" data-th="พท.ที่ดิน" data-en="Lot Area (sq ft)">พท.ที่ดิน</label>
+                        <input type="number" id="lotArea" name="lotArea" min="0">
+                        <div id="lotAreaError" class="error" data-th="พื้นที่ต้องเป็นตัวเลขไม่ติดลบ" data-en="Area must be positive">พื้นที่ต้องเป็นตัวเลขไม่ติดลบ</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="fireplaces" data-th="จำนวนเตาผิง" data-en="Number of Fireplaces">จำนวนเตาผิง</label>
+                        <input type="number" id="fireplaces" name="fireplaces" min="0">
+                        <div id="fireplacesError" class="error" data-th="จำนวนเตาผิงต้องไม่ติดลบ" data-en="Number must be non-negative">จำนวนเตาผิงต้องไม่ติดลบ</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="salePrice" data-th="ราคาขาย" data-en="Sale Price (USD)">ราคาขาย</label>
+                        <input type="number" id="salePrice" name="salePrice" min="0">
+                        <div id="salePriceError" class="error" data-th="ราคาต้องเป็นตัวเลขไม่ติดลบ" data-en="Price must be positive">ราคาต้องเป็นตัวเลขไม่ติดลบ</div>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn" data-th="ค้นหาบ้าน" data-en="Search Homes">ค้นหาบ้าน</button>
+        </form>
+        <div class="links">
+            <a href="login.html" data-th="กลับไปที่หน้าเข้าสู่ระบบ" data-en="Back to Login">กลับไปที่หน้าเข้าสู่ระบบ</a> | 
+            <a href="signup.html" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

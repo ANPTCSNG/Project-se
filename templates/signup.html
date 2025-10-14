@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครสมาชิก</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .terms-group { display: flex; align-items: center; font-size: 0.9em; margin: 15px 0; }
+        .terms-group input { margin-right: 10px; }
+        .terms-group label a { color: #007bff; text-decoration: none; }
+        .terms-group label a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="signupForm" class="form-container">
+            <h2>สมัครสมาชิก</h2>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="ชื่อผู้ใช้" required>
+            </div>
+            <div class="input-group">
+                <input type="email" id="email" placeholder="อีเมล" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="รหัสผ่าน" required>
+            </div>
+            <div class="terms-group">
+                <input type="checkbox" id="termsCheckbox" required>
+                <label for="termsCheckbox">
+                    ฉันยอมรับ <a href="{{ url_for('terms_page') }}" target="_blank">เงื่อนไขการใช้งาน</a>
+                    และ <a href="{{ url_for('privacy_page') }}" target="_blank">นโยบายความเป็นส่วนตัว</a>
+                </label>
+            </div>
+            <button type="submit" class="btn">สมัครสมาชิก</button>
+            <p class="switch-form">มีบัญชีอยู่แล้ว? <a href="{{ url_for('login_page') }}">เข้าสู่ระบบ</a></p>
+        </form>
+    </div>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch("http://127.0.0.1:5000/api/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password })
+            })
+            .then(res => {
+                if (!res.ok) return res.json().then(err => { throw new Error(err.error) });
+                return res.json();
+            })
+            .then(data => {
+                alert("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ");
+                window.location.href = "{{ url_for('login_page') }}";
+            })
+            .catch(err => {
+                alert(err.message || 'การสมัครสมาชิกล้มเหลว');
+            });
+        });
+    </script>
+</body>
+</html>

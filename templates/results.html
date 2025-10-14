@@ -1,315 +1,88 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-</script>
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-th="ผลการค้นหา" data-en="Search Results">ผลการค้นหา</title>
+    <title>ผลการทำนายราคาบ้าน</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f4f9;
-        }
-        nav {
-            width: 100%;
-            padding: 1rem;
-            background: #6b48ff;
-            display: flex;
-            justify-content: flex-end;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        nav a, nav select {
-            margin-left: 1rem;
-            color: black;
-            text-decoration: none;
-            background: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: background-color 0.3s;
-            font-weight: 500;
-        }
-        nav a:hover {
-            background-color: #eee;
-            text-decoration: none;
-        }
-        nav select {
-            border: none;
-            cursor: pointer;
-        }
+        /* CSS เฉพาะสำหรับหน้านี้ สามารถย้ายไปรวมใน styles.css ได้ */
+        body { margin-top: 80px; }
         .results-container {
-            margin-top: 100px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 2rem;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            max-width: 900px;
-            width: 90%;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 2rem auto;
             text-align: center;
         }
-        h2 {
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-        .disclaimer {
-            color: #777;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-        .data-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem 3rem;
-            width: 100%;
-            text-align: left;
-            padding: 1rem;
-        }
-        .data-grid p {
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #444;
-            border-bottom: 1px dashed #eee;
-            padding-bottom: 5px;
-        }
-        .data-grid span {
+        .price-display {
+            font-size: 2.5rem;
             font-weight: bold;
             color: #6b48ff;
+            margin: 1rem 0;
         }
-        .links {
-            margin-top: 2rem;
-            font-size: 1rem;
+        .disclaimer {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 2rem;
         }
         .links a {
             color: #6b48ff;
-            text-decoration: none;
-            margin: 0 0.5rem;
             font-weight: 600;
-        }
-        .links a:hover {
-            text-decoration: underline;
-        }
-
-        /* --- Custom Modal Styles --- */
-        .modal-overlay {
-            display: none; /* ซ่อนไว้เป็นค่าเริ่มต้น */
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(2px);
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            animation: slideIn 0.3s ease-out;
-        }
-        .modal-content h3 {
-            margin-top: 0;
-            color: #6b48ff;
-            font-size: 1.4rem;
-        }
-        .modal-content p {
-            margin-bottom: 20px;
-            color: #555;
-        }
-        .modal-content button {
-            background-color: #6b48ff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .modal-content button:hover {
-            background-color: #5a3de6;
-        }
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Media Queries for Responsiveness */
-        @media (max-width: 768px) {
-            .data-grid {
-                grid-template-columns: 1fr;
-            }
-            .results-container {
-                padding: 1.5rem;
-                margin-top: 80px;
-            }
-            nav a, nav select {
-                padding: 0.4rem 0.8rem;
-                margin-left: 0.5rem;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Custom Modal HTML Structure -->
-    <div id="customModal" class="modal-overlay" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h3>แจ้งเตือน</h3>
-            <p id="modalMessage"></p>
-            <button onclick="closeModal()">ตกลง</button>
-        </div>
-    </div>
-
     <nav>
-        <a href="login.html" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
-        <a href="signup.html" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
-        <select id="languageSelector">
-            <option value="th">ไทย</option>
-            <option value="en">English</option>
-        </select>
+        <a href="{{ url_for('home_page') }}">ค้นหาใหม่</a>
+        <a href="#" id="logoutButton">ออกจากระบบ</a>
     </nav>
-    <div class="results-container">
-        <h2 data-th="ผลการค้นหาบ้านที่ใกล้เคียงที่สุด" data-en="Closest Matching Home Found">ผลการค้นหาบ้านที่ใกล้เคียงที่สุด</h2>
-        <p class="disclaimer" data-th="ข้อมูลนี้มาจากการวิเคราะห์ชุดข้อมูลจำลองเพื่อการศึกษาเท่านั้น" data-en="This data is from a simulated dataset analysis for educational purposes only.">
-            ข้อมูลนี้มาจากการวิเคราะห์ชุดข้อมูลจำลองเพื่อการศึกษาเท่านั้น
-        </p>
-        <div class="data-grid">
-            <!-- คอลัมน์ 1: หัวข้อ 1-5 -->
-            <div>
-                <p data-th="คุณภาพโดยรวม: " data-en="Overall Quality: "><span id="overallQualResult">8</span>/10</p>
-                <p data-th="เกรดสภาพบ้าน: " data-en="Condition Grade: "><span id="overallCondResult">6</span>/10</p>
-                <p data-th="พื้นที่ห้องนั่งเล่น: " data-en="Living Area: "><span id="livAreaResult">2,000</span> ตารางฟุต</p>
-                <p data-th="พื้นที่ชั้น 1: " data-en="1st Floor Area: "><span id="firstFlrSFResult">1,200</span> ตารางฟุต</p>
-                <p data-th="พื้นที่โรงรถ: " data-en="Garage Area: "><span id="garageAreaResult">450</span> ตารางฟุต</p>
+
+    <div class="container">
+        <div class="results-container">
+            <h2>ผลการทำนายราคาบ้าน</h2>
+            <p class="disclaimer">ผลลัพธ์นี้เป็นการประมาณการจากโมเดล Machine Learning เท่านั้น</p>
+            
+            <p>ราคาประเมินคือ:</p>
+            <div class="price-display" id="predictedPrice">$0.00</div>
+
+            <div class="links" style="margin-top: 2rem;">
+                 <a href="{{ url_for('home_page') }}">กลับไปที่หน้าค้นหา</a>
             </div>
-            <!-- คอลัมน์ 2: หัวข้อ 6-10 -->
-            <div>
-                <p data-th="จำนวนรถในโรงรถ: " data-en="Garage Capacity: "><span id="garageCarsResult">2</span> คัน</p>
-                <p data-th="ปีที่สร้าง: " data-en="Year Built: "><span id="yearBuiltResult">2005</span></p>
-                <p data-th="ปีที่ปรับปรุง: " data-en="Year Remodeled: "><span id="yearRemodAddResult">2005</span></p>
-                <p data-th="จำนวนห้องน้ำเต็ม: " data-en="Number of Full Baths: "><span id="fullBathResult">2</span></p>
-                <p data-th="คุณภาพชั้นใต้ดิน: " data-en="Basement Quality: "><span id="bsmtQualResult">Excellent</span></p>
-            </div>
-            <!-- คอลัมน์ 3: หัวข้อ 11-15 -->
-            <div>
-                <p data-th="คุณภาพห้องครัว: " data-en="Kitchen Quality: "><span id="kitchenQualResult">Good</span></p>
-                <p data-th="ย่านที่ตั้ง: " data-en="Neighborhood: "><span id="neighborhoodResult">Northridge</span></p>
-                <p data-th=\"พื้นที่ที่ดิน: \" data-en=\"Lot Area: \"><span id=\"lotAreaResult\">10,000</span> ตารางฟุต</p>
-                <p data-th="จำนวนเตาผิง: " data-en="Number of Fireplaces: "><span id="fireplacesResult">1</span></p>
-                <p data-th="ราคาขาย (ประมาณ): " data-en="Sale Price (approx): ">$<span id="salePriceResult">250,000</span></p>
-            </div>
-        </div>
-        <div class="links">
-            <a href="index.html" data-th="กลับไปที่หน้าค้นหา" data-en="Back to Search">กลับไปที่หน้าค้นหา</a>
         </div>
     </div>
+    
     <script>
-        // --- Custom Modal Functions ---
-        function showModal(message) {
-            const modal = document.getElementById('customModal');
-            const modalMessage = document.getElementById('modalMessage');
-            if (modal && modalMessage) {
-                modalMessage.textContent = message;
-                modal.style.display = 'flex';
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- ดึงราคาที่ทำนายจาก URL Parameter ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const price = urlParams.get('price');
+            const predictedPriceElement = document.getElementById('predictedPrice');
+
+            if (price && predictedPriceElement) {
+                // จัดรูปแบบตัวเลขให้มี comma คั่นหลักพัน
+                const formattedPrice = parseFloat(price).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                predictedPriceElement.textContent = `$${formattedPrice}`;
             }
-        }
 
-        function closeModal() {
-            const modal = document.getElementById('customModal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        }
-
-        // Example data loading logic (simulate getting data)
-        window.onload = function() {
-            // Check login status for nav links
-            const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-            const loginLogoutLink = document.getElementById('loginLogoutLink');
-            const signupAccountLink = document.getElementById('signupAccountLink');
-
-            if (isLoggedIn) {
-                loginLogoutLink.textContent = 'ออกจากระบบ';
-                loginLogoutLink.href = "#";
-                signupAccountLink.textContent = 'บัญชีของฉัน';
-                signupAccountLink.href = "#";
-                loginLogoutLink.onclick = function(e) {
+            // --- จัดการปุ่ม Logout ---
+            const logoutButton = document.getElementById('logoutButton');
+            if(logoutButton) {
+                logoutButton.addEventListener('click', function(e) {
                     e.preventDefault();
-                    localStorage.removeItem("isLoggedIn");
-                    localStorage.removeItem("username");
-                    showModal("ออกจากระบบสำเร็จ");
-                    setTimeout(() => { window.location.href = "login.html"; }, 500);
-                }
-            } else {
-                // If not logged in, should ideally redirect to login
-                // showModal("กรุณาเข้าสู่ระบบเพื่อดูผลการค้นหา");
-                // setTimeout(() => { window.location.href = "login.html"; }, 1000);
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('user_id');
+                    alert('คุณออกจากระบบสำเร็จ');
+                    window.location.href = "{{ url_for('login_page') }}";
+                });
             }
-
-            // Simulate loading results (e.g. from localStorage or API)
-            // For now, static data is used in the HTML.
-            showModal("แสดงผลการค้นหาที่ใกล้เคียงที่สุด");
-        }
+        });
     </script>
 </body>
 </html>

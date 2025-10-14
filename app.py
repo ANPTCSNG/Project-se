@@ -77,6 +77,10 @@ def terms_page():
 def privacy_page():
     return render_template('privacy.html')
 
+@app.route('/results')
+def results_page():
+    return render_template('results.html')
+
 #  API ENDPOINTS (ส่วนสำหรับรับส่งข้อมูล)
 
 # --- AUTHENTICATION API ---

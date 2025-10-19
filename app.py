@@ -1,6 +1,3 @@
-
-# IMPORTS
-
 from flask import Flask, request, jsonify, render_template
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
@@ -10,7 +7,6 @@ import joblib
 import pandas as pd
 from datetime import datetime
 import numpy as np
-
 
 # APP & DB CONFIGURATION
 
@@ -138,6 +134,8 @@ def login():
 
 # --- PREDICTION API ---
 @app.route('/api/predict', methods=['POST'])
+@app.route('/api/predict', methods=['POST'])
+
 def predict():
     """Endpoint สำหรับการทำนายราคาบ้าน และบันทึกประวัติ"""
     if not model:

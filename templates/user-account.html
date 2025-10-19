@@ -1,0 +1,123 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-th="บัญชีผู้ใช้" data-en="User Account">บัญชีผู้ใช้</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        nav {
+            width: 100%;
+            padding: 1rem;
+            background: #6b48ff;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        nav a, nav select {
+            margin-left: 1rem;
+            color: black;
+            text-decoration: none;
+            background: white;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .account-container {
+            margin-top: 60px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .account-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .account-section p {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+        }
+        .account-section span {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        @media (max-width: 768px) {
+            .account-section {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
+        <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
+        <select id="languageSelector">
+            <option value="th">ไทย</option>
+            <option value="en">English</option>
+        </select>
+    </nav>
+    <div class="account-container">
+        <h2 data-th="บัญชีผู้ใช้" data-en="User Account">บัญชีผู้ใช้</h2>
+        <div class="account-section">
+            <p data-th="ชื่อผู้ใช้: " data-en="Username: "><span id="usernameDisplay">-</span></p>
+            <p data-th="อีเมล: " data-en="Email: "><span id="emailDisplay">-</span></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

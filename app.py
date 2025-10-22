@@ -1,6 +1,3 @@
-
-# IMPORTS
-
 from flask import Flask, request, jsonify, render_template
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
@@ -8,17 +5,18 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import joblib
 import pandas as pd
-from datetime import datetime
+import datetime
+from datetime import timezone
 import numpy as np
+from bson.errors import InvalidId
+from pymongo.errors import DuplicateKeyError
 
-
-# APP & DB CONFIGURATION
+# ------------------------------------------APP & DB CONFIGURATION
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 CORS(app)
-
-# --- MongoDB Setup ---
+# ---------------------------------------------- MongoDB Setup ---
 MONGO_URI = "mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
 DB_NAME = "house_price_app"
 
@@ -27,26 +25,32 @@ try:
     db = client[DB_NAME]
     users_collection = db["users"]
     predictions_collection = db['predictions']
+    feedbacks_collection = db['feedbacks']
     users_collection.create_index([("username", 1)], unique=True)
     print("✅ Connected to MongoDB successfully.")
 except Exception as e:
     print(f"❌ ERROR: Could not connect to MongoDB. {e}")
 
 
-# 3. LOAD MACHINE LEARNING MODEL
-
+# ----------------------------------------------------LOAD MACHINE LEARNING MODEL
 try:
-    model = joblib.load("ml_model/model.pkl")
-    feature_columns = joblib.load("ml_model/feature_columns.pkl")
-    print("✅ ML model and feature columns loaded successfully.")
+    pipeline = joblib.load("ml_model/house_price_pipeline_Train_10.joblib")
+    print("Pipeline 'ml_model/house_price_pipeline_Train_10.joblib' loaded successfully.")
 except FileNotFoundError:
-    print("❌ ERROR: model.pkl or feature_columns.pkl not found.")
-    model = None
-    feature_columns = []
-
-#  WEB PAGE ROUTES (ส่วนสำหรับเปิดหน้าเว็บ HTML)
-
-
+   print("ERROR: Model file not found.")
+   pipeline = None
+TRAINED_COLUMNS = [
+    "OverallQual",
+    "TotalBsmtSF",
+    "LotArea",
+    "GarageCars",
+    "Fireplaces",
+    "BedroomAbvGr",
+    "GrLivArea",
+    "FullBath",
+    "Neighborhood"
+  ]
+#  ----------------------------------------------WEB PAGE ROUTES (ส่วนสำหรับเปิดหน้าเว็บ HTML)
 @app.route('/')
 def index_page():
     # เมื่อเข้าเว็บครั้งแรก ให้ไปที่หน้า login
@@ -80,10 +84,12 @@ def privacy_page():
 @app.route('/results')
 def results_page():
     return render_template('results.html')
+@app.route('/user-account')
+def user_account_page():
+    return render_template('user-account.html')
 
-#  API ENDPOINTS (ส่วนสำหรับรับส่งข้อมูล)
-
-# --- AUTHENTICATION API ---
+#  --------------------------------------------------API ENDPOINTS (ส่วนสำหรับรับส่งข้อมูล)
+# ----------------------------------------------------- AUTHENTICATION API ---
 @app.route('/api/signup', methods=['POST'])
 def signup():
     """Endpoint สำหรับการลงทะเบียนผู้ใช้ใหม่"""
@@ -104,10 +110,13 @@ def signup():
             "username": username,
             "password": hashed_password,
             "email": email,
-            "created_at": datetime.utcnow()
+            "created_at": datetime.datetime.utcnow()
         }
         users_collection.insert_one(user_doc)
         return jsonify({'message': 'Register success'}), 201
+    except DuplicateKeyError:
+        # 409 Conflict คือ Status code ที่บอกว่า "ข้อมูลขัดแย้ง/ซ้ำ"
+        return jsonify({"error": "ชื่อผู้ใช้นี้ถูกใช้งานแล้ว"}), 409
     
     except Exception as e:
         return jsonify({'error': f'Registration failed: {e}'}), 500
@@ -129,7 +138,8 @@ def login():
             return jsonify({
                 'message': 'Login success', 
                 'user_id': str(user['_id']), 
-                'username': user['username']
+                'username': user['username'],
+                "email": user.get('email', '')
             }), 200
         else:
             return jsonify({'error': 'Invalid username or password'}), 401
@@ -139,42 +149,112 @@ def login():
 # --- PREDICTION API ---
 @app.route('/api/predict', methods=['POST'])
 def predict():
-    """Endpoint สำหรับการทำนายราคาบ้าน และบันทึกประวัติ"""
-    if not model:
-        return jsonify({'error': 'ML model is not loaded.'}), 503
+    if pipeline is None:
+        return jsonify({'error': 'Model is not loaded'}), 500
+
+    data = request.get_json()
+    if data is None:
+        return jsonify({'error': 'No input data provided'}), 400
+    # --- 1. รับข้อมูล 2 ส่วน ---
+    feature_data = data.get('features') # นี่คือ dict ของ 9 features
+    price_range = data.get('price_range') # นี่คือ string เช่น "100k-200k"
+    
+    if not feature_data:
+        return jsonify({'error': 'No features provided'}), 400
+
+    input_data = {}
+    for col in TRAINED_COLUMNS:
+        value = feature_data.get(col)
+        if value is None or value == "":
+            input_data[col] = np.nan
+        else:
+        
+            if col in ['Neighborhood']:
+                 input_data[col] = value
+            else:
+                try:
+                    input_data[col] = float(value)
+                except (ValueError, TypeError):
+            
+                    input_data[col] = np.nan
+    
+    try:
+        input_df = pd.DataFrame([input_data], columns=TRAINED_COLUMNS)
+    except Exception as e:
+       return jsonify({'error': f'Error creating DataFrame: {str(e)}'}), 400
 
     try:
-        data = request.get_json()
-        user_id = data.get('user_id')
-        if not user_id:
-            return jsonify({'error': 'User ID is required'}), 400
+        log_predicted_price = pipeline.predict(input_df)[0]
+        actual_predicted_price = np.exp(log_predicted_price)     
+        is_match = False
+        if price_range:
+            if price_range == "0-100000" and 0 <= actual_predicted_price <= 100000:
+                is_match = True
+            elif price_range == "100001-200000" and 100001 <= actual_predicted_price <= 200000:
+                is_match = True
+            elif price_range == "200001-300000" and 200001 <= actual_predicted_price <= 300000:
+                is_match = True
+            elif price_range == "300001-400000" and 300001 <= actual_predicted_price <= 400000:
+                is_match = True
+            elif price_range == "400001-500000" and 400001 <= actual_predicted_price   <= 500000:
+                is_match = True 
+            elif price_range == "500000+" and actual_predicted_price >= 500001:
+                is_match = True
             
-        user_id_obj = ObjectId(user_id)
-        if not users_collection.find_one({"_id": user_id_obj}):
-            return jsonify({'error': 'User ID not found.'}), 404
-
-        X_new = pd.DataFrame(0, index=[0], columns=feature_columns)
-        for col in feature_columns:
-             if col in data:
-                 X_new[col] = data[col]
-        
-        pred_price = model.predict(X_new)[0]
-        rounded_price = round(float(pred_price), 2)
-        
-        prediction_log = {
-            "user_id": user_id_obj,
-            "input_features": {key: data[key] for key in feature_columns if key in data},
-            "predicted_price": rounded_price,
-            "timestamp": datetime.utcnow()
-        }
-        predictions_collection.insert_one(prediction_log)
-        return jsonify({"predicted_price": rounded_price}), 200
+        return jsonify({
+            'predicted_price': actual_predicted_price,
+            'matches_budget': is_match, # ⬅️ ส่งผลการเปรียบเทียบกลับไป
+            'desired_range': price_range
+        })
     except Exception as e:
-        return jsonify({'error': f'Prediction failed: {e}'}), 500
+        return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
 
+        
+# --- -----------------------------------------------FEEDBACK API ---
+@app.route('/api/feedback', methods=['POST'])
+def handle_feedback():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
 
-#RUN THE APP
+    user_id_string = data.get('user_id')
+    if not user_id_string:
+        return jsonify({'error': 'Missing user_id'}), 400
 
+    try:
+        user_object_id = ObjectId(user_id_string)
+    except InvalidId:
+        return jsonify({'error': 'Invalid user_id format'}), 400
+    except Exception as e:
+        return jsonify({'error': f'Error converting user_id: {str(e)}'}), 500
+
+    try:
+        feedback_document = {
+            "user_id": user_object_id, 
+            "predicted_price": data.get('predicted_price'),
+            "overall_qual": data.get('OverallQual'),
+            "price_range": data.get('price_range'),
+            "total_bsmt_sf": data.get('TotalBsmtSF'),
+            "lot_area": data.get('LotArea'),
+            "gr_liv_area": data.get('GrLivArea'),
+            "garage_cars": data.get('GarageCars'),
+            "fireplaces": data.get('Fireplaces'),
+            "bedroom_abv_gr": data.get('BedroomAbvGr'),
+            "full_bath": data.get('FullBath'),
+            "neighborhood": data.get('Neighborhood'),
+            "comment": data.get('comment'),
+            "rating": data.get('rating'),
+            "timestamp": datetime.datetime.utcnow() 
+        }
+
+        # ✅ แก้ไข: ใช้ตัวแปร 'feedbacks_collection' ที่เราสร้างไว้
+        feedbacks_collection.insert_one(feedback_document)
+        
+        return jsonify({'message': 'Feedback received successfully'}), 201
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to save feedback: {str(e)}'}), 500
+    
+#----------------------------------RUN THE APP
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
-    

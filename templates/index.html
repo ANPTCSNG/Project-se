@@ -1,133 +1,230 @@
-<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ค้นหาบ้านในฝัน</title>
+    <title data-th="ค้นหาบ้านในฝัน" data-en="Find Your Dream Home">ค้นหาบ้านในฝัน</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"defer></script>
     <style>
-        /* CSS เฉพาะสำหรับหน้านี้ สามารถย้ายไปรวมใน styles.css ได้ */
-        body { margin-top: 80px; } /* เพิ่มพื้นที่สำหรับ Nav Bar ที่เป็น fixed */
+        nav {
+            width: 100%;
+            padding: 1rem;
+            background: #6b48ff;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        nav a, nav select {
+            margin-left: 1rem;
+            color: black;
+            text-decoration: none;
+            background: white;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
         .form-grid {
             display: grid;
-            /* ทำให้ยืดหยุ่นบนหน้าจอขนาดต่างๆ */
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
-            margin-top: 1rem;
+            margin-top: 60px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .input-group label {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .input-group select {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            height: 2.5rem;
+            box-sizing: border-box;
+        }
+        .error {
+            font-size: 0.8rem;
+            color: red;
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .input-group label {
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <nav>
-        <a href="#" id="logoutButton">ออกจากระบบ</a>
+        <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
+        <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
         <select id="languageSelector">
             <option value="th">ไทย</option>
             <option value="en">English</option>
         </select>
     </nav>
-
-    <div class="container">
-        <h2>ค้นหาบ้านในฝัน</h2>
+    <div class="search-container">
+        <h2 data-th="ค้นหาบ้านในฝัน" data-en="Find Your Dream Home">ค้นหาบ้านในฝัน</h2>
         <form id="searchForm">
             <div class="form-grid">
-                <div class="input-group">
-                    <label for="OverallQual">คุณภาพโดยรวม (1-10)</label>
-                    <input type="number" id="OverallQual" name="OverallQual" min="1" max="10" required>
+                <!-- คอลัมน์ 1: หัวข้อ 1-5 -->
+                <div>
+                    <div class="input-group">
+                        <label for="overallQual" data-th="คุณภาพโดยรวม (1-10)" data-en="Overall Quality (1-10)">คุณภาพโดยรวม (1-10)</label>
+                        <select id="OverallQual" name="overallQual">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="grLivArea" data-th="พท.อยู่อาศัยเหนือพื้นดิน" data-en="Living Area Above (sq ft)">พท.อยู่อาศัยเหนือพื้นดิน</label>
+                        <select id="GrLivArea" name="grLivArea">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="0-1000">0-1000</option>
+                            <option value="1001-2000">1001-2000</option>
+                            <option value="2001-3000">2001-3000</option>
+                            <option value="3001-4000">3001-4000</option>
+                            <option value="4000+">4000+</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="totalBsmtSF" data-th="พท.ชั้นใต้ดินทั้งหมด" data-en="Total Basement Area (sq ft)">พท.ชั้นใต้ดินทั้งหมด</label>
+                        <select id="TotalBsmtSF" name="totalBsmtSF">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="0-1000">0-1000</option>
+                            <option value="1001-2000">1001-2000</option>
+                            <option value="2001-3000">2001-3000</option>
+                            <option value="3000+">3000+</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="lotArea" data-th="พท.ที่ดิน" data-en="Lot Area (sq ft)">พท.ที่ดิน</label>
+                        <select id="LotArea" name="lotArea">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="0-25000">0-25000</option>
+                            <option value="25001-50000">25001-50000</option>
+                            <option value="50001-75000">50001-75000</option>
+                            <option value="75000-100000">75000-100000</option>
+                            <option value="100000+">100000+</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="garageCars" data-th="ความจุโรงรถ" data-en="Garage Capacity (cars)">ความจุโรงรถ</label>
+                        <select id="GarageCars" name="garageCars">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label for="GrLivArea">พื้นที่อยู่อาศัย (ตร.ฟุต)</label>
-                    <input type="number" id="GrLivArea" name="GrLivArea" min="0" required>
-                </div>
-                <div class="input-group">
-                    <label for="GarageCars">ความจุโรงรถ (คัน)</label>
-                    <input type="number" id="GarageCars" name="GarageCars" min="0" required>
-                </div>
-                <div class="input-group">
-                    <label for="TotalBsmtSF">พื้นที่ชั้นใต้ดิน (ตร.ฟุต)</label>
-                    <input type="number" id="TotalBsmtSF" name="TotalBsmtSF" min="0" required>
-                </div>
-                 <div class="input-group">
-                    <label for="FullBath">จำนวนห้องน้ำ</label>
-                    <input type="number" id="FullBath" name="FullBath" min="0" required>
-                </div>
-                <div class="input-group">
-                    <label for="YearBuilt">ปีที่สร้าง</label>
-                    <input type="number" id="YearBuilt" name="YearBuilt" min="1800" max="2025" required>
+                <!-- คอลัมน์ 2: หัวข้อ 6-10 -->
+                <div>
+                    <div class="input-group">
+                        <label for="neighborhood" data-th="ย่านที่ตั้ง" data-en="Name of Area">ย่านที่ตั้ง</label>
+                        <select id="Neighborhood" name="neighborhood">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="Blmngtn">Bloomington Heights</option>
+                            <option value="Blueste">Bluestem</option>
+                            <option value="Briardl">Briardale</option>
+                            <option value="Brooksd">Brookside</option>
+                            <option value="ClearCr">Clear Creek</option>
+                            <option value="CollgCr">College Creek</option>
+                            <option value="Crawfor">Crawford</option>
+                            <option value="Edwards">Edwards</option>
+                            <option value="Gilbert">Gilbert</option>
+                            <option value="IDOTRR">Iowa DOT and Rail Road</option>
+                            <option value="MeadowV">Meadow Village</option>
+                            <option value="Mitchel">Mitchell</option>
+                            <option value="NWAmes">North Ames</option>
+                            <option value="NoRidge">Northridge</option>
+                            <option value="NPkVill">Northpark Villa</option>
+                            <option value="NridgHt">Northridge Heights</option>
+                            <option value="NwAmes">Northwest Ames</option>
+                            <option value="OldTown">Old Town</option>
+                            <option value="SWISU">South & West of Iowa State University</option>
+                            <option value="Sawyer">Sawyer</option>
+                            <option value="SawyerW">Sawyer West</option>
+                            <option value="Somerst">Somerset</option>
+                            <option value="StoneBr">Stone Brook</option>
+                            <option value="Timber">Timberland</option>
+                            <option value="Veenker">Veenker</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="numberOfBathroom" data-th="จำนวนห้องน้ำ" data-en="Number of Bathroom">จำนวนห้องน้ำ</label>
+                        <select id="FullBath" name="numberOfBathroom">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="fireplaces" data-th="จำนวนเตาผิง" data-en="Number of Fireplaces">จำนวนเตาผิง</label>
+                        <select id="Fireplaces" name="fireplaces">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="numberOfBedrooms" data-th="จำนวนห้องนอน" data-en="Number of Bedrooms">จำนวนห้องนอน</label>
+                        <select id="BedroomAbvGr" name="numberOfBedrooms">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="salePrice" data-th="ราคาขาย" data-en="Sale Price (USD)">ราคาขาย</label>
+                        <select id="SalePrice" name="salePrice">
+                            <option value="" data-th="เลือก" data-en="Select">เลือก</option>
+                            <option value="0-100000">0-100000</option>
+                            <option value="100001-200000">100001-200000</option>
+                            <option value="200001-300000">200001-300000</option>
+                            <option value="300001-400000">300001-400000</option>
+                            <option value="400001-500000">400001-500000</option>
+                            <option value="500000+">500000+</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <button type="submit" class="btn" style="margin-top: 1.5rem;">ทำนายราคา</button>
+            <button type="submit" class="btn" data-th="ค้นหาบ้าน" data-en="Search Homes">ค้นหาบ้าน</button>
         </form>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- ตรวจสอบสถานะ Login ---
-            if (localStorage.getItem('isLoggedIn') !== 'true') {
-                alert('กรุณาเข้าสู่ระบบเพื่อใช้งาน');
-                window.location.href = "{{ url_for('login_page') }}";
-                return; // หยุดการทำงาน script ที่เหลือ
-            }
-            
-            // --- จัดการปุ่ม Logout ---
-            const logoutButton = document.getElementById('logoutButton');
-            if(logoutButton) {
-                logoutButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    localStorage.clear();
-                    alert('ออกจากระบบสำเร็จ');
-                    window.location.href = "{{ url_for('login_page') }}";
-                });
-            }
-
-            // --- จัดการฟอร์มค้นหา ---
-            const searchForm = document.getElementById('searchForm');
-            if(searchForm) {
-                searchForm.addEventListener('submit', function(event) {
-                    event.preventDefault();
-
-                    const user_id = localStorage.getItem("user_id");
-                    if (!user_id) {
-                        alert("เกิดข้อผิดพลาด: ไม่พบ User ID กรุณาล็อกอินใหม่อีกครั้ง");
-                        return;
-                    }
-
-                    // --- รวบรวมข้อมูลจากฟอร์ม ---
-                    const payload = {
-                        user_id: user_id,
-                        OverallQual: parseInt(document.getElementById('OverallQual').value),
-                        GrLivArea: parseInt(document.getElementById('GrLivArea').value),
-                        GarageCars: parseInt(document.getElementById('GarageCars').value),
-                        TotalBsmtSF: parseInt(document.getElementById('TotalBsmtSF').value),
-                        FullBath: parseInt(document.getElementById('FullBath').value),
-                        YearBuilt: parseInt(document.getElementById('YearBuilt').value)
-                        // **สำคัญ:** เพิ่มฟีเจอร์อื่นๆ ที่โมเดลของคุณต้องการที่นี่
-                    };
-
-                    // --- ใช้ Fetch API เพื่อส่งข้อมูลไปทำนายราคา ---
-                    fetch("http://127.0.0.1:5000/api/predict", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    })
-                    .then(res => {
-                        if (!res.ok) {
-                            return res.json().then(err => { throw new Error(err.error || 'การทำนายราคาล้มเหลว') });
-                        }
-                        return res.json();
-                    })
-                    .then(data => {
-                        if (data.predicted_price !== undefined) {
-                            // ส่งผลการทำนายไปที่หน้า results.html ผ่าน URL
-                            window.location.href = `{{ url_for('results_page') }}?price=${data.predicted_price}`;
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Prediction Error:", err);
-                        alert(err.message);
-                    });
-                });
-            }
-        });
-    </script>
+    
 </body>
 </html>

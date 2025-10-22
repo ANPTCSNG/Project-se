@@ -1,66 +1,122 @@
-<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>นโยบายความเป็นส่วนตัว</title>
+    <title data-th="นโยบายความเป็นส่วนตัว" data-en="Privacy Policy">นโยบายความเป็นส่วนตัว</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <style>
-        /* CSS เฉพาะสำหรับหน้านี้ สามารถย้ายไปรวมใน styles.css ได้ */
-        body {
-            margin-top: 80px; /* เพิ่มพื้นที่สำหรับ Nav Bar ที่เป็น fixed */
+        nav {
+            width: 100%;
+            padding: 1rem;
+            background: #6b48ff;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
-        .content-box { /* ใช้ class กลางๆ ที่อาจมีใน styles.css */
-            padding: 2rem;
+        nav a, nav select {
+            margin-left: 1rem;
+            color: black;
+            text-decoration: none;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            max-width: 800px;
-            margin: 2rem auto;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
         }
-        .content-box h2 {
-            text-align: center;
-            color: #6b48ff;
-            margin-bottom: 1.5rem;
+        nav a:hover {
+            text-decoration: underline;
         }
-        .content-box p {
-            line-height: 1.6;
-            text-align: justify;
+        .privacy-container {
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background-color: white;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        .links {
-            text-align: center;
-            margin-top: 1.5rem;
+        .privacy-content {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            width: 100%;
         }
-        .links a {
-            color: #6b48ff;
-            font-weight: 600;
+        .privacy-content ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin: 0.5rem 0;
+        }
+        .privacy-content ul li {
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .privacy-container {
+                max-width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+            }
         }
     </style>
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('login_page') }}">เข้าสู่ระบบ</a>
-        <a href="{{ url_for('signup_page') }}">สมัครสมาชิก</a>
+        <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
+        <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
         <select id="languageSelector">
             <option value="th">ไทย</option>
             <option value="en">English</option>
         </select>
     </nav>
-
-    <div class="container">
-        <div class="content-box">
-            <h2>นโยบายความเป็นส่วนตัว</h2>
-            <p>เรามุ่งมั่นปกป้องความเป็นส่วนตัวของคุณ เอกสารนี้อธิบายวิธีที่เราเก็บรวบรวม ใช้ และปกป้องข้อมูลส่วนบุคคลของคุณ</p>
-            <p><b>1. การเก็บรวบรวมข้อมูล:</b> เราอาจเก็บข้อมูล เช่น ชื่อ อีเมล และข้อมูลการใช้งาน เมื่อคุณสมัครและใช้บริการของเรา</p>
-            <p><b>2. การใช้งานข้อมูล:</b> ข้อมูลของคุณจะถูกใช้เพื่อปรับปรุงบริการ, ทำการสื่อสารที่จำเป็น, และมอบประสบการณ์การใช้งานที่ดีขึ้น</p>
-            <p><b>3. การคุ้มครองข้อมูล:</b> เราใช้มาตรการความปลอดภัยทางเทคนิคและการบริหารจัดการที่เหมาะสมเพื่อป้องกันการเข้าถึง, การเปิดเผย, หรือการทำลายข้อมูลโดยไม่ได้รับอนุญาต</p>
-            <p><b>4. สิทธิของผู้ใช้:</b> คุณมีสิทธิ์เข้าถึง, แก้ไข, หรือร้องขอให้ลบข้อมูลส่วนบุคคลของคุณได้ตามนโยบายของเรา</p>
-            <p>นโยบายนี้อาจมีการปรับปรุงตามกฎหมายหรือการเปลี่ยนแปลงของบริการ กรุณาตรวจสอบอย่างสม่ำเสมอ</p>
-            <div class="links">
-                <a href="{{ url_for('signup_page') }}">กลับไปที่หน้าสมัครสมาชิก</a>
-            </div>
+    <div class="privacy-container">
+        <h2 data-th="นโยบายความเป็นส่วนตัว" data-en="Privacy Policy">นโยบายความเป็นส่วนตัว</h2>
+        <div class="privacy-content">
+            <p data-th="1. บทนำ: เรายอมรับและเคารพความเป็นส่วนตัวของคุณ นโยบายความเป็นส่วนตัวฉบับนี้ระบุถึงข้อมูลส่วนบุคคลที่เราเก็บรวบรวม เหตุผลที่เก็บรวบรวม วิธีการใช้งานและการแบ่งปัน รวมถึงสิทธิที่ผู้อยู่อาศัยในแคลิฟอร์เนียมีตามกฎหมายแคลิฟอร์เนีย (CCPA/CPRA) หากคุณเป็นผู้อยู่อาศัยในแคลิฟอร์เนีย สิทธิและการเปิดเผยบางประการในนโยบายนี้จะใช้กับคุณ" data-en="1. Introduction: We respect your privacy. This Privacy Policy describes what personal information we collect, why we collect it, how we use and share it, and the rights California residents have under California law (CCPA/CPRA). If you are a California resident, certain rights and disclosures in this policy apply to you."></p>
+            <p data-th="2. ขอบเขตและการใช้บังคับ: นโยบายนี้ใช้กับข้อมูลที่เก็บรวบรวมผ่านเว็บไซต์และบริการที่เกี่ยวข้องของเราในบริการนี้ ครอบคลุมข้อมูลที่เราเก็บรวบรวมจากผู้ใช้ที่เยี่ยมชม ลงทะเบียน หรือใช้งานบริการ" data-en="2. Scope & Applicability: This policy applies to data collected through our website and related services through this service. It covers data we collect about users who visit, register, or otherwise use the Service."></p>
+            <p data-th="3. หมวดหมู่ของข้อมูลส่วนบุคคลที่เราเก็บรวบรวม (12 เดือนที่ผ่านมา): เราเก็บรวบรวมหมวดหมู่ข้อมูลส่วนบุคคลต่อไปนี้" data-en="3. Categories of Personal Information We Collect (past 12 months): We collect the following categories of personal information">
+                <ul>
+                    <li data-th="ตัวระบุ: ชื่อ ที่อยู่อีเมล รหัสผู้ใช้" data-en="Identifiers: name, email address, user ID"></li>
+                    <li data-th="ข้อมูลบัญชี / การยืนยันตัวตน: รหัสผ่านที่เข้ารหัสและโทเค็นการยืนยัน (เราไม่เก็บรหัสผ่านแบบธรรมดา — เราเก็บแฮชที่ปลอดภัย)" data-en="Account data / authentication: hashed password and authentication tokens (we do not store plain text passwords — we store secure hashes)"></li>
+                    <li data-th="กิจกรรมอินเทอร์เน็ตหรือเครือข่าย: ที่อยู่ IP ประเภทอุปกรณ์/เบราว์เซอร์ หน้าเว็บที่เยี่ยมชม เวลาที่เข้าใช้งาน" data-en="Internet or network activity: IP address, device/browser type, pages visited, timestamps"></li>
+                    <li data-th="ประวัติการใช้งาน: การโต้ตอบกับเครื่องมือทำนายราคา การค้นหาที่บันทึก อินพุตและเอาต์พุตของโมเดล (เมื่อเชื่อมโยงกับบัญชีผู้ใช้)" data-en="Usage history: interactions with our prediction tools, saved searches, model inputs and outputs (where tied to a user account)"></li>
+                    <li data-th="ข้อมูลที่ได้มา/อนุมาน: แพทเทิร์นการใช้งานหรือความชอบของโมเดลที่อนุมานจากกิจกรรมของคุณ" data-en="Derived/inferred data: usage patterns or model preferences inferred from your activity"></li>
+                </ul>
+                <span data-th="(เราอาจเก็บรวบรวมหมวดหมู่อื่น ๆ ตามความจำเป็น เราจะระบุหมวดหมู่และวัตถุประสงค์ในหน้านี้และอัปเดตวันที่มีผลเมื่อมีการเปลี่ยนแปลง)" data-en="(We may collect other categories as needed; we will list categories and purposes on this page and update the effective date when we change.)"></span>
+            </p>
+            <p data-th="4. แหล่งที่มาของข้อมูลส่วนบุคคล: เราเก็บรวบรวมข้อมูลส่วนบุคคล: โดยตรงจากคุณ (เช่น เมื่อคุณลงทะเบียน) โดยอัตโนมัติจากอุปกรณ์และเบราว์เซอร์ของคุณ และจากบริการของบุคคลที่สามที่คุณเลือกเชื่อมต่อ (เช่น บริการวิเคราะห์หรือผู้ให้บริการอีเมล)" data-en="4. Sources of Personal Information: We collect personal information: directly from you (e.g., when you register), automatically from your device and browser, and from third-party services you choose to connect (e.g., analytics or email providers)."></p>
+            <p data-th="5. วัตถุประสงค์ทางการค้าในการเก็บรวบรวม: เราใช้ข้อมูลส่วนบุคคลเพื่อ" data-en="5. Business or Commercial Purposes for Collection: We use personal information to">
+                <ul>
+                    <li data-th="จัดหาและรักษาบริการรวมถึงบัญชีของคุณ" data-en="Provide and maintain the Service and your account"></li>
+                    <li data-th="ยืนยันตัวตนของคุณ ป้องกันบัญชีของคุณ และตรวจจับการฉ้อโกง" data-en="Authenticate you, secure your account, and detect fraud"></li>
+                    <li data-th="จัดส่งและปรับแต่งการทำนายราคาบ้านและประวัติที่บันทึก" data-en="Deliver and personalize house-price predictions and saved history"></li>
+                    <li data-th="แก้ปัญหา วิเคราะห์ และปรับปรุงโมเดลและบริการของเรา" data-en="Troubleshoot, analyze, and improve our models and Service"></li>
+                    <li data-th="สื่อสารกับคุณ (ประกาศบัญชี การอัปเดต)" data-en="Communicate with you (account notices, updates)"></li>
+                    <li data-th="ปฏิบัติตามพันธกรณีทางกฎหมายและปกป้องสิทธิ" data-en="Comply with legal obligations and protect rights"></li>
+                </ul>
+                <span data-th="(เราจะเปิดเผยรายละเอียดเพิ่มเติมเกี่ยวกับแต่ละหมวดหมู่และวัตถุประสงค์ในเว็บไซต์ของเรา)" data-en="(We will disclose more details about each category and purposes on our site.)"></span>
+            </p>
+            <p data-th="6. การเปิดเผย / การขาย / การแบ่งปันข้อมูลส่วนบุคคล: เราอาจแบ่งปันข้อมูลส่วนบุคคลกับผู้ให้บริการที่ดำเนินการแทนเรา (เช่น การโฮสต์ วิเคราะห์ อีเมล) เราไม่ตั้งใจขายข้อมูลส่วนบุคคลให้กับบุคคลที่สามเพื่อวัตถุประสงค์ทางการค้าที่ไม่เกี่ยวข้อง หากแนวปฏิบัติของเราเปลี่ยนแปลง (เช่น เราเริ่ม 'ขาย' หรือ 'แบ่งปัน' ตามที่กฎหมายกำหนด) เราจะจัดหาเครื่องมือยกเลิกที่ชัดเจน (Do Not Sell/Share) เพื่อให้คุณเลือกไม่เข้าร่วมได้ หากต้องการยกเลิกการขายหรือการแบ่งปันในขณะนี้ [ใส่ลิงก์ยกเลิก]" data-en="6. Disclosure / Sale / Sharing of Personal Information: We may share personal information with service providers who perform functions on our behalf (e.g., hosting, analytics, email). We do not intentionally sell personal information to third parties for unrelated commercial purposes. If our practices change (e.g., we begin 'selling' or 'sharing' as defined by applicable law), we will provide a clear opt-out mechanism (Do Not Sell/Share). To opt out of sale or sharing at any time, [insert opt-out link]."></p>
+            <p data-th="7. การเก็บรักษาและการลบ: เราเก็บรักษาข้อมูลส่วนบุคคลตามที่จำเป็นเพื่อให้บริการและเพื่อวัตถุประสงค์ทางธุรกิจที่ชอบด้วยกฎหมาย (เช่น ความต้องการด้านการดำเนินงาน ความปลอดภัย การปฏิบัติตามกฎหมาย) คุณสามารถร้องขอการลบข้อมูลส่วนบุคคลของคุณตามที่ระบุด้านล่าง; กรุณาทราบข้อยกเว้นที่มีจำกัด เช่น การระงับทางกฎหมายหรือการป้องกันการฉ้อโกง" data-en="7. Retention & Deletion: We retain personal information as needed to provide the Service and for legitimate business purposes (e.g., operational needs, security, compliance). You may request deletion of your personal information as described below; note limited exceptions such as legal holds or fraud prevention."></p>
+            <p data-th="8. ความปลอดภัย: เราใช้มาตรการป้องกันด้านการบริหาร เทคนิค และกายภาพที่เหมาะสม (เช่น การเข้ารหัสรหัสผ่าน การเข้ารหัส TLS) เพื่อปกป้องข้อมูลส่วนบุคคล อย่างไรก็ตาม ไม่มีระบบใดปลอดภัยอย่างสมบูรณ์ เราจะแจ้งผู้ใช้ที่ได้รับผลกระทบตามที่กฎหมายกำหนดหากเกิดการละเมิดข้อมูลที่อาจเกิดขึ้น" data-en="8. Security: We implement reasonable administrative, technical, and physical safeguards (e.g., password hashing, TLS encryption) to protect personal information. However, no system is perfectly secure; we will notify affected users as required by law in the event of a potential data breach."></p>
+            <p data-th="9. สิทธิความเป็นส่วนตัวของคุณในแคลิฟอร์เนีย (CCPA / CPRA): หากคุณเป็นผู้อยู่อาศัยในแคลิฟอร์เนีย คุณมีสิทธิ์ดังต่อไปนี้" data-en="9. Your California Privacy Rights (CCPA / CPRA): If you are a California resident, you have certain rights">
+                <ul>
+                    <li data-th="สิทธิในการทราบ: ร้องขอหมวดหมู่และข้อมูลส่วนบุคคลเฉพาะที่เราเก็บรวบรวม เปิดเผย หรือขายในช่วง 12 เดือนที่ผ่านมา" data-en="Right to Know: Request the categories and specific pieces of personal information we collected, disclosed, or sold in the past 12 months"></li>
+                    <li data-th="สิทธิในการลบ: ร้องขอการลบข้อมูลส่วนบุคคลที่เราเก็บรวบรวมจากคุณ (ขึ้นอยู่กับข้อยกเว้น)" data-en="Right to Delete: Request deletion of personal information we collected from you (subject to exceptions)"></li>
+                    <li data-th="สิทธิในการเลือกไม่เข้าร่วม: เลือกไม่เข้าร่วมการขายหรือการแบ่งปันข้อมูลส่วนบุคคลของคุณ" data-en="Right to Opt Out: Opt out of the sale or sharing of your personal information"></li>
+                    <li data-th="สิทธิในการแก้ไขและจำกัดการใช้: ตาม CPRA คุณสามารถแก้ไขความคลาดเคลื่อนและจำกัดการใช้ข้อมูลส่วนบุคคลที่ละเอียดอ่อน" data-en="Right to Correct & Limit Use: Under CPRA, you may correct inaccuracies and limit use of sensitive personal information"></li>
+                    <li data-th="การไม่เลือกปฏิบัติ: เรา不会因您行使这些权利而歧视您 (We will not discriminate for exercising these rights). เราจะตรวจสอบคำขอของคุณตามที่กฎหมายกำหนด" data-en="Non-Discrimination: We will not discriminate for exercising these rights. We will verify your requests as required by law"></li>
+                </ul>
+            </p>
+            <p data-th="10. เด็ก: บริการของเราไม่มุ่งเป้าไปที่เด็กอายุต่ำกว่า 13 ปี เราจะไม่เก็บข้อมูลส่วนบุคคลจากเด็กอายุต่ำกว่า 13 ปีโดยเจตนา หากคุณเชื่อว่าเราได้เก็บข้อมูลจากเด็กโดยละเมิดกฎหมาย กรุณาติดต่อเรา" data-en="10. Children: Our Service is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe we have collected data from a child in violation of law, please contact us."></p>
+            <p data-th="11. บริการและลิงก์ของบุคคลที่สาม: บริการของเราอาจรวมลิงก์หรือการผสานรวมของบุคคลที่สาม (เช่น บริการวิเคราะห์ ผู้ให้บริการอีเมล) บุคคลที่สามเหล่านี้มีนโยบายความเป็นส่วนตัวของตัวเอง เราขอแนะนำให้คุณอ่านนโยบายของพวกเขา" data-en="11. Third-Party Services & Links: Our Service may include third-party links or integrations (e.g., analytics, email providers). These third parties have their own privacy practices. We encourage you to review their policies."></p>
+            <p data-th="12. การเปลี่ยนแปลงนโยบายนี้: เราอาจปรับปรุงนโยบายความเป็นส่วนตัวนี้ วันที่ 'วันที่มีผล' ข้างต้นสะท้อนถึงการแก้ไขล่าสุด การเปลี่ยนแปลงที่สำคัญจะถูกโพสต์อย่างชัดเจนในหน้านี้" data-en="12. Changes to this Policy: We may update this Privacy Policy. The 'Effective date' above reflects the latest revision. Substantial changes will be posted conspicuously on this page."></p>
         </div>
     </div>
     
-    </body>
+</body>
 </html>

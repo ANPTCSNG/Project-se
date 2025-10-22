@@ -1,66 +1,120 @@
-<!DOCTYPE html>
+
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เงื่อนไขการใช้งาน</title>
+    <title data-th="เงื่อนไขการใช้งาน" data-en="Terms of Use">เงื่อนไขการใช้งาน</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
     <style>
-        /* CSS เฉพาะสำหรับหน้านี้ สามารถย้ายไปรวมใน styles.css ได้ */
-        body {
-            margin-top: 80px; /* เพิ่มพื้นที่สำหรับ Nav Bar ที่เป็น fixed */
+        nav {
+            width: 100%;
+            padding: 1rem;
+            background: #6b48ff;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
-        .content-box { /* ใช้ class กลางๆ ที่อาจมีใน styles.css */
-            padding: 2rem;
+        nav a, nav select {
+            margin-left: 1rem;
+            color: black;
+            text-decoration: none;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            max-width: 800px;
-            margin: 2rem auto;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
         }
-        .content-box h2 {
-            text-align: center;
-            color: #6b48ff;
-            margin-bottom: 1.5rem;
+        nav a:hover {
+            text-decoration: underline;
         }
-        .content-box p {
-            line-height: 1.6;
-            text-align: justify;
+        .privacy-container {
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background-color: white;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        .links {
-            text-align: center;
-            margin-top: 1.5rem;
+        .privacy-content {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            width: 100%;
         }
-        .links a {
-            color: #6b48ff;
-            font-weight: 600;
+        .privacy-content ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin: 0.5rem 0;
+        }
+        .privacy-content ul li {
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .privacy-container {
+                max-width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+            }
         }
     </style>
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('login_page') }}">เข้าสู่ระบบ</a>
-        <a href="{{ url_for('signup_page') }}">สมัครสมาชิก</a>
+        <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
+        <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
         <select id="languageSelector">
             <option value="th">ไทย</option>
             <option value="en">English</option>
         </select>
     </nav>
-
-    <div class="container">
-        <div class="content-box">
-            <h2>เงื่อนไขการใช้งาน</h2>
-            <p>ยินดีต้อนรับสู่บริการของเรา ด้วยการใช้เว็บไซต์หรือบริการนี้ คุณตกลงที่จะผูกพันตามเงื่อนไขเหล่านี้ หากคุณไม่เห็นด้วย กรุณาหยุดการใช้งาน</p>
-            <p><b>1. การยอมรับบริการ:</b> การลงทะเบียนบัญชีแสดงว่าคุณยอมรับเงื่อนไขทั้งหมด</p>
-            <p><b>2. ความเป็นส่วนตัว:</b> ข้อมูลของคุณจะได้รับการคุ้มครองตามนโยบายความเป็นส่วนตัวของเรา</p>
-            <p><b>3. การจำกัดความรับผิด:</b> เราไม่รับผิดชอบต่อความเสียหายที่เกิดจากข้อมูลที่ไม่ถูกต้อง ผลการทำนายเป็นเพียงการประมาณการเท่านั้น</p>
-            <p><b>4. การยกเลิกบัญชี:</b> เราสงวนสิทธิ์ในการยกเลิกบัญชีที่ละเมิดเงื่อนไข</p>
-            <p>เงื่อนไขนี้อาจมีการเปลี่ยนแปลงโดยไม่ต้องแจ้งล่วงหน้า กรุณาตรวจสอบเป็นประจำ</p>
-            <div class="links">
-                <a href="{{ url_for('signup_page') }}">กลับไปที่หน้าสมัครสมาชิก</a>
-            </div>
+    <div class="privacy-container">
+        <h2 data-th="เงื่อนไขการใช้งาน" data-en="Terms of Use">เงื่อนไขการใช้งาน</h2>
+        <div class="privacy-content">
+            <p data-th="1. การยอมรับเงื่อนไข: ด้วยการใช้งานบริการ คุณตกลงยอมรับเงื่อนไขเหล่านี้และนโยบายความเป็นส่วนตัวของเรา หากคุณไม่ยอมรับ กรุณาอย่าใช้บริการ (เราอาจอัปเดตเงื่อนไขเหล่านี้ — การใช้งานต่อไปถือว่ายอมรับ)" data-en="1. Acceptance of Terms: By using the Service, you agree to these Terms and our Privacy Policy. If you do not agree, do not use the Service. (We may update these Terms — continued use is acceptance.)"></p>
+            <p data-th="2. คุณสมบัติและบัญชี: คุณสามารถทำสัญญาได้ เพื่อใช้คุณสมบัติบัญชี กรุณาลงทะเบียนด้วยอีเมลและรหัสผ่านที่ถูกต้อง คุณรับผิดชอบในการรักษาความลับของข้อมูลการเข้าสู่ระบบของคุณ แจ้งเราทันทีหากมีการใช้งานโดยไม่ได้รับอนุญาต" data-en="2. Eligibility & Accounts: You are able to enter a contract. To use account features, register with a valid email and password. You are responsible for maintaining the confidentiality of your credentials. Notify us immediately of unauthorized use."></p>
+            <p data-th="3. ข้อมูลผู้ใช้และความปลอดภัย: คุณให้อนุญาตเราในการเก็บและประมวลผลข้อมูลที่คุณส่ง (อีเมล รหัสผู้ใช้ ประวัติการใช้งาน) คุณรับผิดชอบต่อเนื้อหาที่คุณส่งและการระวังเพื่อรักษาความปลอดภัยของข้อมูลการเข้าสู่ระบบของคุณ เราเก็บรหัสผ่านเป็นแฮชที่ปลอดภัยและใช้มาตรการความปลอดภัยที่เหมาะสม เราจะไม่รับผิดชอบต่อการเข้าถึงโดยไม่ได้รับอนุญาตที่เกิดจากความล้มเหลวในการป้องกันบัญชีของคุณ" data-en="3. User Data & Security: You grant us permission to store and process information you submit (email, user ID, usage history). You are responsible for the content you submit and for taking precautions to secure your credentials. We store passwords as secure hashes and use reasonable security measures. We are not liable for unauthorized access arising from your failure to protect your account.">
+                <ul>
+                    <li data-th="คุณให้อนุญาตเราในการเก็บและประมวลผลข้อมูลที่คุณส่ง (อีเมล รหัสผู้ใช้ ประวัติการใช้งาน)" data-en="You grant us permission to store and process information you submit (email, user ID, usage history)"></li>
+                    <li data-th="คุณรับผิดชอบต่อเนื้อหาที่คุณส่งและการระวังเพื่อรักษาความปลอดภัยของข้อมูลการเข้าสู่ระบบของคุณ" data-en="You are responsible for the content you submit and for taking precautions to secure your credentials"></li>
+                    <li data-th="เราเก็บรหัสผ่านเป็นแฮชที่ปลอดภัยและใช้มาตรการความปลอดภัยที่เหมาะสม" data-en="We store passwords as secure hashes and use reasonable security measures"></li>
+                    <li data-th="เราไม่รับผิดชอบต่อการเข้าถึงโดยไม่ได้รับอนุญาตที่เกิดจากความล้มเหลวในการป้องกันบัญชีของคุณ" data-en="We are not liable for unauthorized access arising from your failure to protect your account"></li>
+                </ul>
+            </p>
+            <p data-th="4. การใช้งานที่ยอมรับได้: คุณตกลงที่จะไม่" data-en="4. Acceptable Use: You agree not to">
+                <ul>
+                    <li data-th="ใช้บริการเพื่อกิจกรรมที่ผิดกฎหมาย" data-en="Use the Service for illegal activity"></li>
+                    <li data-th="รบกวนบริการหรือพยายามถอดรหัสโมเดลของเรา" data-en="Interfere with the Service or attempt to reverse-engineer our models"></li>
+                    <li data-th="อัปโหลดโค้ดหรือเนื้อหาที่เป็นอันตรายหรือละเมิดสิทธิของผู้อื่น" data-en="Upload malicious code or content that violates others’ rights"></li>
+                </ul>
+                <span data-th="การละเมิดอาจนำไปสู่การระงับหรือยกเลิก" data-en="Violation may result in suspension or termination"></span>
+            </p>
+            <p data-th="5. คำอธิบายบริการและคำปฏิเสธความรับผิด (สำคัญ): บริการของเราจัดหาการทำนายราคาบ้านที่ขับเคลื่อนด้วยข้อมูลโดยใช้โมเดลสถิติและข้อมูลของบุคคลที่สาม การทำนายเป็นเพียงการประเมินและอาจไม่แม่นยำ คุณเข้าใจและตกลงว่า" data-en="5. Service Description & Disclaimer (Important): Our Service provides data-driven house-price predictions using statistical models and third-party data. Predictions are estimates and may be inaccurate. You understand and agree that">
+                <ul>
+                    <li data-th="การทำนายมีวัตถุประสงค์เพื่อการให้ข้อมูลเท่านั้นและไม่ถือเป็นคำแนะนำทางการเงิน กฎหมาย ภาษี หรืออสังหาริมทรัพย์มืออาชีพ; กรุณาปรึกษาผู้เชี่ยวชาญที่มีคุณสมบัติก่อนตัดสินใจ" data-en="Predictions are for informational purposes only and do not constitute professional financial, legal, tax, or real estate advice; consult a qualified professional before making decisions"></li>
+                    <li data-th="เราไม่รับประกันความแม่นยำหรือความสมบูรณ์ของการทำนาย ข้อมูลอินพุต หรือข้อมูลของบุคคลที่สาม" data-en="We do not guarantee accuracy or completeness of predictions, input data, or third-party data"></li>
+                </ul>
+                <span data-th="(เราแนะนำให้มีคำปฏิเสธความรับผิดชัดเจนบนหน้าจอเมื่อแสดงการทำนาย)" data-en="(We recommend a clear on-screen disclaimer where predictions appear.)"></span>
+            </p>
+            <p data-th="6. สิทธิในทรัพย์สินทางปัญญา: เนื้อหาทั้งหมดในบริการ (การออกแบบ ข้อความ โมเดล โค้ด) เป็นกรรมสิทธิ์ของ [COMPANY NAME] หรือได้รับอนุญาตให้เรา คุณไม่สามารถทำซ้ำหรือใช้เนื้อหาของเรานอกเหนือจากที่ได้รับอนุญาต" data-en="6. Intellectual Property: All content on the Service (design, text, models, code) is owned by [COMPANY NAME] or licensed to us. You may not reproduce or use our content except as authorized."></p>
+            <p data-th="7. เนื้อหาที่ผู้ใช้ให้มาและใบอนุญาต: หากคุณส่งเนื้อหา (เช่น ความคิดเห็นของผู้ใช้หรือชุดข้อมูลสาธารณะ) คุณให้ใบอนุญาตทั่วโลกที่ปราศจากค่าลิขสิทธิ์แก่เราในการใช้ โฮสต์ แก้ไข และแสดงเนื้อหานั้นในส่วนที่เกี่ยวข้องกับบริการ" data-en="7. User-Provided Content & License: If you submit content (e.g., user comments or public datasets), you grant us a worldwide, royalty-free license to use, host, modify, and display that content in connection with the Service."></p>
+            <p data-th="8. การชำระเงินและการคืนเงิน (หากคุณเรียกเก็บเงินสำหรับคุณสมบัติพรีเมียม): หากคุณมีแผนที่ต้องชำระเงิน กรุณาระบุราคา รอบการเรียกเก็บเงิน และนโยบายการคืนเงินที่นี่ (หากคุณวางแผนที่จะเรียกเก็บเงิน กรุณารวมเงื่อนไขการยกเลิกและการต่ออายุที่ชัดเจน)" data-en="8. Payment & Refunds (if you charge for premium features): If you offer paid plans, list pricing, billing cycles, and refund policy here. (If you plan to charge, include clear cancellation and renewal terms.)"></p>
+            <p data-th="9. การยกเลิกและการระงับ: เราอาจระงับหรือยกเลิกบัญชีสำหรับการละเมิด การใช้ในทางที่ผิด หรือการไม่ใช้งาน คุณสามารถปิดบัญชีของคุณได้จากโปรไฟล์หรือติดต่อฝ่ายสนับสนุน" data-en="9. Termination & Suspension: We may suspend or terminate accounts for violations, abuse, or inactivity. You may close your account from your profile or by contacting support">
+                <ul>
+                    <li data-th="เราอาจระงับหรือยกเลิกบัญชีสำหรับการละเมิด การใช้ในทางที่ผิด หรือการไม่ใช้งาน" data-en="We may suspend or terminate accounts for violations, abuse, or inactivity"></li>
+                    <li data-th="คุณสามารถปิดบัญชีของคุณได้จากโปรไฟล์หรือติดต่อฝ่ายสนับสนุน" data-en="You may close your account from your profile or by contacting support"></li>
+                </ul>
+            </p>
+            <p data-th="10. คำปฏิเสธความรับผิดและข้อจำกัดความรับผิดชอบ: ตามที่กฎหมายอนุญาตสูงสุด บริการนี้ให้บริการ 'ตามสภาพ' และ '[COMPANY NAME]' ปฏิเสธการรับประกันทั้งหมด เราไม่รับผิดชอบต่อความเสียหายทางอ้อม อันเกิดขึ้นเป็นพิเศษ หรือความเสียหายที่ตามมา หรือการสูญเสียกำไร ข้อมูล หรือชื่อเสียง ในกรณีใด ๆ ความรับผิดรวมของเราจะไม่เกิน [LIMIT AMOUNT] (หรือ $100 หากใช้ได้/กำหนดโดยกฎหมาย) (กฎหมายแคลิฟอร์เนียอาจกำหนดข้อจำกัดเพิ่มเติม — กรุณาปรึกษาทนาย)" data-en="10. Disclaimers & Limitation of Liability: TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SERVICE IS PROVIDED 'AS IS' AND '[COMPANY NAME]' DISCLAIMS ALL WARRANTIES. WE ARE NOT LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES, OR FOR LOSS OF PROFITS, DATA, OR GOODWILL. IN NO EVENT SHALL OUR AGGREGATE LIABILITY EXCEED [LIMIT AMOUNT] (OR $100 IF APPLICABLE/REQUIRED BY LAW). (California law may impose additional limits — consult counsel.)"></p>
+            <p data-th="11. กฎหมายที่บังคับใช้และการระงับข้อพิพาท: เงื่อนไขเหล่านี้อยู่ภายใต้กฎหมายของรัฐ (หรือเขตอำนาจที่คุณเลือก) หากคุณเลือกการระงับข้อพิพาทด้วยการไกล่เกลี่ยหรือวิธีอื่น กรุณาระบุรายละเอียดที่นี่ (เงื่อนไขเทคโนโลยีหลายรายการเลือกใช้รัฐที่กำหนดและข้อกำหนดการไกล่เกลี่ย; กรุณาพิจารณาการตรวจสอบทางกฎหมายเพื่อให้บังคับใช้ได้)" data-en="11. Governing Law & Dispute Resolution: These Terms are governed by the laws of the State of (or your preferred jurisdiction). If you choose arbitration or other dispute procedures, include those details here. (Many tech Terms choose a governing state and arbitration clause; consider legal review for enforceability.)"></p>
+            <p data-th="12. การเปลี่ยนแปลงเงื่อนไข: เราอาจแก้ไขเงื่อนไขเหล่านี้; เราจะโพสต์เงื่อนไขที่อัปเดตพร้อมวันที่ที่มีผลใหม่ การใช้งานต่อไปหลังจากมีการเปลี่ยนแปลงถือว่ายอมรับ" data-en="12. Changes to Terms: We may modify these Terms; we will post the updated Terms with a new effective date. Continued use after changes constitutes acceptance."></p>
         </div>
     </div>
-    
-    </body>
+</body>
 </html>

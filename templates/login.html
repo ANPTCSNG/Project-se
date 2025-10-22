@@ -3,81 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบ</title>
+    <title data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</title>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+   <style>
+        nav {
+            width: 100%;
+            padding: 1rem;
+            background: #6b48ff;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        nav a, nav select {
+            margin-left: 1rem;
+            color: black;
+            text-decoration: none;
+            background: white;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .login-container{
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            width: 100%;
+            max-width: 500px; /* กว้างขึ้นสองเท่า */
+        }
+        .input-group label {
+            font-size: 0.9rem;
+        }
+        .input-group input {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            height: 2.5rem;
+            width: 100%; /* ใช้เต็มความกว้างของ .input-group */
+            box-sizing: border-box;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 1.2rem; /* ขนาดสัญลักษณ์ให้เด่นชัด */
+        }
+        .error {
+            font-size: 0.8rem;
+            color: red;
+            display: none;
+        }
+        .btn {
+            padding: 0.75rem 2rem; /* กว้างขึ้นสองเท่า */
+            font-size: 1.2rem;
+            background-color: #6b48ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 500px; /* กว้างขึ้นสองเท่า */
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            background-color: #5a3de6;
+        }
+        .links {
+            margin-top: 1rem;
+        }
+        @media (max-width: 768px) {
+            .input-group {
+                max-width: 100%; /* ปรับให้เต็มหน้าจอในมือถือ */
+            }
+            .btn {
+                width: 100%; /* ปรับปุ่มให้เต็มในมือถือ */
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
+    <nav>
+        <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
+        <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
+        <select id="languageSelector">
+            <option value="th">ไทย</option>
+            <option value="en">English</option>
+        </select>
+    </nav>
+    <div class="login-container">
         <form id="loginForm" class="form-container">
-            <h2>เข้าสู่ระบบ</h2>
+            <h2 data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</h2>
             <div class="input-group">
-                <label for="username">ชื่อผู้ใช้</label>
+                <label for="username" data-th="ชื่อผู้ใช้" data-en="Username">ชื่อผู้ใช้</label>
                 <input type="text" id="username" name="username" required autocomplete="username">
+                <div id="usernameError" class="error" data-th="ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร" data-en="Username must be at least 3 characters">ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร</div>
             </div>
             <div class="input-group">
-                <label for="password">รหัสผ่าน</label>
+                <label for="password" data-th="รหัสผ่าน" data-en="Password">รหัสผ่าน</label>
                 <input type="password" id="password" name="password" required autocomplete="current-password">
-                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                <div id="passwordError" class="error" data-th="รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" data-en="Password must be at least 6 characters">รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร</div>
+
             </div>
-            <button type="submit" class="btn">เข้าสู่ระบบ</button>
+            <button type="submit" class="btn" data-th="เข้าสู่ระบบ" data-en="Log In">เข้าสู่ระบบ</button>
             <div class="links" style="margin-top: 1rem; text-align: center;">
-                <a href="{{ url_for('forgotpassword_page') }}">ลืมรหัสผ่าน?</a> | 
-                <a href="{{ url_for('signup_page') }}">สมัครสมาชิก</a>
+                <a href="{{ url_for('forgotpassword_page') }}" data-th="ลืมรหัสผ่าน?" data-en="Forgot Password?">ลืมรหัสผ่าน?</a> | 
+                <a href="{{ url_for('signup_page') }}"data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
             </div>
         </form>
     </div>
-    
-    <script>
-        // --- ฟังก์ชันแสดง/ซ่อนรหัสผ่าน ---
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.querySelector('.toggle-password');
-            if (passwordInput && toggleIcon) {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                toggleIcon.textContent = type === 'password' ? '👁️' : '🙈';
-            }
-        }
-
-        // --- จัดการฟอร์ม Login ---
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                // --- ใช้ Fetch API เพื่อส่งข้อมูลไปที่ Backend จริง ---
-                fetch("http://127.0.0.1:5000/api/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password })
-                })
-                .then(res => {
-                    if (!res.ok) {
-                        // ถ้า Server ตอบกลับ Error (เช่น รหัสผิด) ให้โยนเป็น Error
-                        return res.json().then(err => { throw new Error(err.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง') });
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.message === "Login success") {
-                        // บันทึกข้อมูลที่จำเป็นลงในเบราว์เซอร์
-                        localStorage.setItem("isLoggedIn", "true");
-                        localStorage.setItem("username", data.username);
-                        localStorage.setItem("user_id", data.user_id); // สำคัญมากสำหรับ Predict
-                        
-                        alert(`ยินดีต้อนรับ ${data.username}!`);
-                        window.location.href = "{{ url_for('home_page') }}"; // ไปยังหน้า Home
-                    }
-                })
-                .catch(err => {
-                    console.error("Login Error:", err);
-                    alert(err.message); // แสดง Error ที่ได้รับจาก Server
-                });
-            });
-        }
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"defer></script>
 </body>
 </html>

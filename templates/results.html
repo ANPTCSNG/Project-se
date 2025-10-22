@@ -1,88 +1,184 @@
-<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ผลการทำนายราคาบ้าน</title>
+    <title data-th="ผลการค้นหา" data-en="Search Results">ผลการค้นหา</title>
+    <script src="{{ url_for('static', filename='script.js') }}">defer</script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        /* CSS เฉพาะสำหรับหน้านี้ สามารถย้ายไปรวมใน styles.css ได้ */
-        body { margin-top: 80px; }
-        .results-container {
-            padding: 2rem;
+        nav {
+            width: 100%;
+            padding: 1rem;
+            background: #6b48ff;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        nav a, nav select {
+            margin-left: 1rem;
+            color: black;
+            text-decoration: none;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            max-width: 800px;
-            margin: 2rem auto;
-            text-align: center;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
         }
-        .price-display {
-            font-size: 2.5rem;
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .results-container {
+            margin-top: 60px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: minmax(350px, 1fr) minmax(350px, 1fr) minmax(350px, 1fr);
+            gap: 2rem;
+            justify-content: center;
+        }
+        .result-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            min-height: 450px; /* Ensure consistent height */
+        }
+        .titles, .results {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .titles p, .results p {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+        }
+        .results p span {
             font-weight: bold;
-            color: #6b48ff;
-            margin: 1rem 0;
+            color: #2c3e50;
         }
-        .disclaimer {
-            font-size: 0.9rem;
-            color: #777;
-            margin-bottom: 2rem;
+        .comment-section {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
-        .links a {
-            color: #6b48ff;
-            font-weight: 600;
+        .comment-section textarea {
+            width: 100%;
+            min-height: 100px;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .comment-section .buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+        .comment-section .buttons button {
+            padding: 0.75rem 1.5rem;
+            background: #6b48ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+        .comment-section .buttons button:hover {
+            background: #5538cc;
+        }
+        .back-button {
+            display: block;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            background: #6b48ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background 0.3s;
+        }
+        .back-button:hover {
+            background: #5538cc;
+        }
+        @media (max-width: 1024px) {
+            .results-grid {
+                grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            .result-section {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
         }
     </style>
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('home_page') }}">ค้นหาใหม่</a>
-        <a href="#" id="logoutButton">ออกจากระบบ</a>
+        <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
+        <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
+        <select id="languageSelector">
+            <option value="th">ไทย</option>
+            <option value="en">English</option>
+        </select>
     </nav>
-
-    <div class="container">
-        <div class="results-container">
-            <h2>ผลการทำนายราคาบ้าน</h2>
-            <p class="disclaimer">ผลลัพธ์นี้เป็นการประมาณการจากโมเดล Machine Learning เท่านั้น</p>
+    <div class="results-container">
+        <h2 data-th="ผลการค้นหา" data-en="Search Results">ผลการค้นหา</h2>
+        <div class="results-grid">
+            <div class="result-section">
+                <h3 data-th="ข้อมูลที่คุณกรอก" data-en="Your Inputs">ข้อมูลที่คุณกรอก</h3>
+                <div class="results">
+                    <p data-th="คุณภาพโดยรวม:" data-en="Overall Quality:"><span id="OverallQualResult1">-</span></p>
+                    <p data-th="พื้นที่ชั้นใต้ดิน:" data-en="Basement Area:"><span id="TotalBsmtSFResult1">-</span> ตร.ฟุต</p>
+                    <p data-th="พื้นที่ที่ดิน:" data-en="Lot Area:"><span id="LotAreaResult1">-</span> ตร.ฟุต</p>
+                    <p data-th="ความจุโรงรถ:" data-en="Garage Capacity:"><span id="GarageCarsResult1">-</span> คัน</p>
+                    <p data-th="จำนวนเตาผิง:" data-en="Fireplaces:"><span id="FireplacesResult1">-</span></p>
+                    <p data-th="จำนวนห้องนอน:" data-en="Bedrooms:"><span id="BedroomAbvGrResult1">-</span></p>
+                    <p data-th="พื้นที่อยู่อาศัย:" data-en="Living Area:"><span id="GrLivAreaResult1">-</span> ตร.ฟุต</p>
+                    <p data-th="จำนวนห้องน้ำ:" data-en="Bathrooms:"><span id="FullBathResult1">-</span></p>
+                    <p data-th="ย่านที่ตั้ง:" data-en="Neighborhood:"><span id="NeighborhoodResult1">-</span></p>
+                    </div>
+            </div>
+            <div class="result-section">
+                <h3 data-th="ผลการทำนาย" data-en="Prediction Results">ผลการทำนาย</h3>
+                <div class="results">
+                    <p data-th="งบประมาณที่คุณเลือก:" data-en="Your Budget:">งบประมาณที่คุณเลือก:</p>
+                    <p><span id="budgetDisplay">-</span> USD</p> 
             
-            <p>ราคาประเมินคือ:</p>
-            <div class="price-display" id="predictedPrice">$0.00</div>
-
-            <div class="links" style="margin-top: 2rem;">
-                 <a href="{{ url_for('home_page') }}">กลับไปที่หน้าค้นหา</a>
+                    <p data-th="ราคาที่ทำนายได้:" data-en="Predicted Price:">ราคาที่ทำนายได้:</p>
+                    <p><b><span id="predictedPriceDisplay">-</span> USD</b></p>
+            
+                    <p data-th="ตรงกับงบประมาณ:" data-en="Matches Budget:">ตรงกับงบประมาณ:</p>
+                    <p><span id="budgetMatchDisplay">-</span></p> 
+                </div>
             </div>
         </div>
+        <div class="comment-section">
+            <textarea id="comment-textarea" placeholder="Enter your comment here..." data-th="ใส่ความคิดเห็นของคุณที่นี่..." data-en="Enter your comment here..."></textarea>
+            <div class="buttons">
+                <button id="send-comment-btn" data-th="ส่ง" data-en="Send">ส่ง</button>
+                <button id="like-btn" data-th="👍" data-en="👍">👍</button>
+                <button id="dislike-btn" data-th="👎" data-en="👎">👎</button>
+            </div>
+        </div>
+        <a href="{{ url_for('home_page') }}" class="back-button" data-th="กลับไปที่หน้าค้นหา" data-en="Back to Search">กลับไปที่หน้าค้นหา</a>
     </div>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- ดึงราคาที่ทำนายจาก URL Parameter ---
-            const urlParams = new URLSearchParams(window.location.search);
-            const price = urlParams.get('price');
-            const predictedPriceElement = document.getElementById('predictedPrice');
-
-            if (price && predictedPriceElement) {
-                // จัดรูปแบบตัวเลขให้มี comma คั่นหลักพัน
-                const formattedPrice = parseFloat(price).toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                predictedPriceElement.textContent = `$${formattedPrice}`;
-            }
-
-            // --- จัดการปุ่ม Logout ---
-            const logoutButton = document.getElementById('logoutButton');
-            if(logoutButton) {
-                logoutButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('user_id');
-                    alert('คุณออกจากระบบสำเร็จ');
-                    window.location.href = "{{ url_for('login_page') }}";
-                });
-            }
-        });
-    </script>
 </body>
 </html>

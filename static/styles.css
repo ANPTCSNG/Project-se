@@ -13,7 +13,17 @@ body {
     background: linear-gradient(45deg, #6b48ff, #00ddeb);
 }
 
-.login-container, .search-container, .results-container {
+
+.results-container {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 1800px;
+}
+
+.login-container, .search-container {
     background: white;
     padding: 2rem;
     border-radius: 10px;
@@ -68,7 +78,6 @@ body {
     margin-top: 0.25rem;
     display: none;
 }
-
 .btn {
     width: 100%;
     padding: 0.75rem;

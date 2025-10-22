@@ -3,63 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สมัครสมาชิก</title>
+    <title data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
     <style>
         .terms-group { display: flex; align-items: center; font-size: 0.9em; margin: 15px 0; }
         .terms-group input { margin-right: 10px; }
         .terms-group label a { color: #007bff; text-decoration: none; }
         .terms-group label a:hover { text-decoration: underline; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #6b48ff, #00ddeb);
+            padding-top: 80px; /* Space for the fixed navbar */
+        }
+
+        /* Navigation Bar Styles */
+        nav {
+            width: 100%;
+            padding: 1rem;
+            background: #6b48ff;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        nav a, nav select {
+            margin-left: 1rem;
+            color: #333;
+            text-decoration: none;
+            background: #f0f2f5;
+            padding: 0.4rem 0.8rem;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        nav a:hover {
+            background: #e0e2e5;
+        }
+
+        /* Form Container Styles */
+        .form-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+        }
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        /* Input Group Styles */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #6b48ff;
+        }
+        .input-group input::placeholder {
+            color: #999;
+        }
+        
+        /* Terms and Conditions Group */
+        .terms-group { 
+            display: flex; 
+            align-items: center; 
+            font-size: 0.9em; 
+            margin: 1.5rem 0; 
+            color: #555;
+        }
+        .terms-group input[type="checkbox"] { 
+            margin-right: 10px; 
+            width: auto;
+        }
+        .terms-group label a { 
+            color: #6b48ff; 
+            text-decoration: none; 
+        }
+        .terms-group label a:hover { 
+            text-decoration: underline; 
+        }
+
+        /* Button Styles */
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #6b48ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: #5538cc;
+        }
+        
+        /* Link to switch to login page */
+        .switch-form {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+        }
+        .switch-form a {
+            color: #6b48ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .switch-form a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 1.5rem;
+                margin: 1rem;
+                box-shadow: none;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <nav>
+        <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
+        <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
+        <select id="languageSelector">
+            <option value="th">ไทย</option>
+            <option value="en">English</option>
+        </select>
+    </nav>
         <form id="signupForm" class="form-container">
-            <h2>สมัครสมาชิก</h2>
+            <h2 data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</h2>
             <div class="input-group">
+                <label for="username" data-th="ชื่อผู้ใช้" data-en="Username">ชื่อผู้ใช้</label>
                 <input type="text" id="username" placeholder="ชื่อผู้ใช้" required>
+                <div id="usernameError" class="error" data-th="ชื่อผู้ใช้ต้องมีความยาวอย่างน้อย 3 ตัวอักษร" data-en="Username must be at least 3 characters">Username must be at least 3 characters</div>
             </div>
             <div class="input-group">
+                <label for="email" data-th="อีเมล" data-en="Email">อีเมล</label>
                 <input type="email" id="email" placeholder="อีเมล" required>
+                <div id="emailError" class="error" data-th="กรุณากรอกอีเมลที่ถูกต้อง" data-en="Please enter a valid email">Please enter a valid email</div>
             </div>
             <div class="input-group">
+                <label for="password" data-th="รหัสผ่าน" data-en="Password">รหัสผ่าน</label>
                 <input type="password" id="password" placeholder="รหัสผ่าน" required>
+                <div id="passwordError" class="error" data-th="รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร" data-en="Password must be at least 6 characters">Password must be at least 6 characters</div>
             </div>
             <div class="terms-group">
                 <input type="checkbox" id="termsCheckbox" required>
+
                 <label for="termsCheckbox">
-                    ฉันยอมรับ <a href="{{ url_for('terms_page') }}" target="_blank">เงื่อนไขการใช้งาน</a>
-                    และ <a href="{{ url_for('privacy_page') }}" target="_blank">นโยบายความเป็นส่วนตัว</a>
+                    <span data-th="ฉันยอมรับ" data-en="I agree to the">ฉันยอมรับ</span>
+                    <a href="{{ url_for('terms_page') }}" target="_blank" data-th="เงื่อนไขการใช้งาน" data-en="Terms of Use">เงื่อนไขการใช้งาน</a>
+                    <span data-th="และ" data-en="and"></span>
+                    <a href="{{ url_for('privacy_page') }}" target="_blank" data-th="นโยบายความเป็นส่วนตัว" data-en="Privacy Policy">นโยบายความเป็นส่วนตัว</a>
                 </label>
             </div>
-            <button type="submit" class="btn">สมัครสมาชิก</button>
-            <p class="switch-form">มีบัญชีอยู่แล้ว? <a href="{{ url_for('login_page') }}">เข้าสู่ระบบ</a></p>
+            <button type="submit" class="btn" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</button>
         </form>
-    </div>
-    <script>
-        document.getElementById('signupForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
 
-            fetch("http://127.0.0.1:5000/api/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, email, password })
-            })
-            .then(res => {
-                if (!res.ok) return res.json().then(err => { throw new Error(err.error) });
-                return res.json();
-            })
-            .then(data => {
-                alert("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ");
-                window.location.href = "{{ url_for('login_page') }}";
-            })
-            .catch(err => {
-                alert(err.message || 'การสมัครสมาชิกล้มเหลว');
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"defer></script>
 </body>
 </html>

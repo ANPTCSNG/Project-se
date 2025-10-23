@@ -33,12 +33,39 @@ except Exception as e:
 
 
 # ----------------------------------------------------LOAD MACHINE LEARNING MODEL
+# โหลด Price Model
 try:
-    pipeline = joblib.load("ml_model/house_price_pipeline_Train_10.joblib")
-    print("Pipeline 'ml_model/house_price_pipeline_Train_10.joblib' loaded successfully.")
+    price_model = joblib.load("ml_model/price_model.joblib")
+    print("Price Model loaded successfully.")
 except FileNotFoundError:
-   print("ERROR: Model file not found.")
-   pipeline = None
+    print("ERROR: price_model.joblib not found.")
+    price_model = None
+
+# โหลด Imputer Model
+try:
+    imputer_model = joblib.load("ml_model/imputer_model.joblib")
+    print("Imputer Model loaded successfully.")
+except FileNotFoundError:
+    print("ERROR: imputer_model.joblib not found.")
+    imputer_model = None
+neighborhood_list = [
+    "Blmngtn", "Blueste", "Briardl", "Brooksd", "ClearCr", 
+    "CollgCr", "Crawfor", "Edwards", "Gilbert", "IDOTRR",
+    "MeadowV", "Mitchel", "NWAmes", "NoRidge", "NPkVill",
+    "NridgHt", "NwAmes", "OldTown", "SWISU", "Sawyer",
+    "SawyerW", "Somerst", "StoneBr", "Timber", "Veenker"
+]
+int_features = [
+    "OverallQual", "TotalBsmtSF", "LotArea", "GarageCars", 
+    "Fireplaces", "BedroomAbvGr", "GrLivArea", "FullBath"
+]
+
+default_neighborhood = 0  # หรือเลข index ที่เหมาะสม
+
+# Mapping รหัส → ตัวเลขสำหรับโมเดล
+neighborhood_to_num = {name: i for i, name in enumerate(neighborhood_list)}
+num_to_neighborhood = {i: name for i, name in enumerate(neighborhood_list)}
+
 TRAINED_COLUMNS = [
     "OverallQual",
     "TotalBsmtSF",
@@ -50,6 +77,14 @@ TRAINED_COLUMNS = [
     "FullBath",
     "Neighborhood"
   ]
+reverse_models = {}
+for f in TRAINED_COLUMNS:
+    try:
+        reverse_models[f] = joblib.load(f"ml_model/reverse_{f}.joblib")
+        print(f"Reverse Model for {f} loaded successfully.")
+    except FileNotFoundError:
+        print(f"ERROR: reverse_{f}.joblib not found.")
+        reverse_models[f] = None
 #  ----------------------------------------------WEB PAGE ROUTES (ส่วนสำหรับเปิดหน้าเว็บ HTML)
 @app.route('/')
 def index_page():
@@ -83,7 +118,9 @@ def privacy_page():
 
 @app.route('/results')
 def results_page():
+    test_id_value = "ID_FOUND_IN_FLASK"
     return render_template('results.html')
+
 @app.route('/user-account')
 def user_account_page():
     return render_template('user-account.html')
@@ -146,68 +183,89 @@ def login():
     except Exception as e:
         return jsonify({'error': f'Login failed: {e}'}), 500
 
-# --- PREDICTION API ---
+# --- --------------------------------------------------------------PREDICTION API ---
 @app.route('/api/predict', methods=['POST'])
 def predict():
-    if pipeline is None:
+    # --- เช็คว่าโมเดลโหลดเรียบร้อย ---
+    if price_model is None or imputer_model is None or not reverse_models:
         return jsonify({'error': 'Model is not loaded'}), 500
 
     data = request.get_json()
     if data is None:
         return jsonify({'error': 'No input data provided'}), 400
-    # --- 1. รับข้อมูล 2 ส่วน ---
-    feature_data = data.get('features') # นี่คือ dict ของ 9 features
-    price_range = data.get('price_range') # นี่คือ string เช่น "100k-200k"
-    
+
+    # --- รับ input ---
+    feature_data = data.get('features')  # dict ของ 9 features
+    price_range = data.get('price_range')  # string เช่น "100k-200k"
     if not feature_data:
         return jsonify({'error': 'No features provided'}), 400
 
-    input_data = {}
+    # --- เตรียม input DataFrame ---
+    input_dict = {}
     for col in TRAINED_COLUMNS:
-        value = feature_data.get(col)
-        if value is None or value == "":
-            input_data[col] = np.nan
+        val = feature_data.get(col)
+        if val is None or val == "":
+            input_dict[col] = np.nan
         else:
-        
-            if col in ['Neighborhood']:
-                 input_data[col] = value
+            if col == "Neighborhood":
+                input_dict[col] = neighborhood_to_num.get(val, np.nan)
             else:
                 try:
-                    input_data[col] = float(value)
+                    input_dict[col] = float(val)
                 except (ValueError, TypeError):
-            
-                    input_data[col] = np.nan
-    
-    try:
-        input_df = pd.DataFrame([input_data], columns=TRAINED_COLUMNS)
-    except Exception as e:
-       return jsonify({'error': f'Error creating DataFrame: {str(e)}'}), 400
+                    input_dict[col] = np.nan
+
+    input_df = pd.DataFrame([input_dict], columns=TRAINED_COLUMNS)
 
     try:
-        log_predicted_price = pipeline.predict(input_df)[0]
-        actual_predicted_price = np.exp(log_predicted_price)     
+        # --- เติมค่าที่หายด้วย Imputer ---
+        filled_input = imputer_model.transform(input_df)
+        filled_input = pd.DataFrame(filled_input, columns=TRAINED_COLUMNS)
+
+        filled_input['Neighborhood'] = filled_input['Neighborhood'].astype(int)
+
+        # --- ทำนายราคาบ้าน ---
+        pred_price = price_model.predict(filled_input)[0]
+        # --- ตรวจสอบช่วงราคา ---
         is_match = False
         if price_range:
-            if price_range == "0-100000" and 0 <= actual_predicted_price <= 100000:
+            if price_range == "0-100000" and pred_price <= 100000:
                 is_match = True
-            elif price_range == "100001-200000" and 100001 <= actual_predicted_price <= 200000:
+            elif price_range == "100001-200000" and 100000 <= pred_price <= 200000:
                 is_match = True
-            elif price_range == "200001-300000" and 200001 <= actual_predicted_price <= 300000:
+            elif price_range == "200001-300000" and 200000 <= pred_price <= 300000:
                 is_match = True
-            elif price_range == "300001-400000" and 300001 <= actual_predicted_price <= 400000:
+            elif price_range == "300001-400000" and 300000 <= pred_price <= 400000:
                 is_match = True
-            elif price_range == "400001-500000" and 400001 <= actual_predicted_price   <= 500000:
-                is_match = True 
-            elif price_range == "500000+" and actual_predicted_price >= 500001:
+            elif price_range == "400001-500000" and 400000<= pred_price <= 500000:
                 is_match = True
-            
+            elif price_range == "500000+" and pred_price >= 500000:
+                is_match = True
+
+        # --- Reverse Prediction (ทำนาย feature จากราคา) ---
+        guessed_features = {}
+        for f in TRAINED_COLUMNS:
+            if reverse_models.get(f):
+                val = reverse_models[f].predict([[pred_price]])[0]
+                if f in int_features:
+                    val = int(round(val))
+                if f == "Neighborhood":
+                    val = num_to_neighborhood.get(int(round(val)), "Unknown")
+
+                guessed_features[f] = val
+        filled_reverse = pd.DataFrame([guessed_features])
+
         return jsonify({
-            'predicted_price': actual_predicted_price,
-            'matches_budget': is_match, # ⬅️ ส่งผลการเปรียบเทียบกลับไป
-            'desired_range': price_range
+            'predicted_price': pred_price,
+            'matches_budget': is_match,
+            'desired_range': price_range,
+            'imputer_features': filled_input.to_dict(orient='records')[0],
+            'reverse_features': filled_reverse.to_dict(orient='records')[0]
         })
+
     except Exception as e:
         return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
+
 
         
 # --- -----------------------------------------------FEEDBACK API ---

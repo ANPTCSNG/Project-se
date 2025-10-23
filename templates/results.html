@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-th="ผลการค้นหา" data-en="Search Results">ผลการค้นหา</title>
-    <script src="{{ url_for('static', filename='script.js') }}">defer</script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
         nav {
@@ -158,14 +158,12 @@
             <div class="result-section">
                 <h3 data-th="ผลการทำนาย" data-en="Prediction Results">ผลการทำนาย</h3>
                 <div class="results">
-                    <p data-th="งบประมาณที่คุณเลือก:" data-en="Your Budget:">งบประมาณที่คุณเลือก:</p>
-                    <p><span id="budgetDisplay">-</span> USD</p> 
-            
+                    <p data-th="งบประมาณที่คุณเลือก:" data-en="Your Budget:">
+                        <span id="budgetDisplay">-</span> USD</p>
+
+
                     <p data-th="ราคาที่ทำนายได้:" data-en="Predicted Price:">ราคาที่ทำนายได้:</p>
                     <p><b><span id="predictedPriceDisplay">-</span> USD</b></p>
-            
-                    <p data-th="ตรงกับงบประมาณ:" data-en="Matches Budget:">ตรงกับงบประมาณ:</p>
-                    <p><span id="budgetMatchDisplay">-</span></p> 
                 </div>
             </div>
         </div>
@@ -179,6 +177,6 @@
         </div>
         <a href="{{ url_for('home_page') }}" class="back-button" data-th="กลับไปที่หน้าค้นหา" data-en="Back to Search">กลับไปที่หน้าค้นหา</a>
     </div>
-    
+<script src="{{ url_for('static', filename='script.js', v='1.1') }}" defer></script>
 </body>
 </html>

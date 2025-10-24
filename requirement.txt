@@ -9,3 +9,4 @@ scikit-learn
 fastapi
 uvicorn
 gunicorn
+flask-bcrypt

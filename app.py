@@ -406,9 +406,12 @@ def handle_feedback():
     
 #----------------------------------RUN THE APP
 if __name__ == '__main__':
-    #if os.environ.get("FLASK_ENV") == "development":
     port = int(os.environ.get("PORT", 5000))
-    debug_mode = os.environ.get("FLASK_ENV") == "development"
-    app.run(debug=debug_mode, host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port)
+
+    #if os.environ.get("FLASK_ENV") == "development":
+    #port = int(os.environ.get("PORT", 5000))
+    #debug_mode = os.environ.get("FLASK_ENV") == "development"
+    #app.run(debug=debug_mode, host="0.0.0.0", port=port)
     #app.run(debug=True, host="0.0.0.0", port=5000)
         

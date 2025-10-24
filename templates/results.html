@@ -17,6 +17,7 @@
             left: 0;
             z-index: 1000;
         }
+
         nav a, nav select {
             margin-left: 1rem;
             color: black;
@@ -25,9 +26,11 @@
             padding: 0.3rem 0.5rem;
             border-radius: 4px;
         }
+
         nav a:hover {
             text-decoration: underline;
         }
+
         .results-container {
             margin-top: 60px;
             padding: 2rem;
@@ -35,12 +38,14 @@
             flex-direction: column;
             gap: 1rem;
         }
+
         .results-grid {
             display: grid;
             grid-template-columns: minmax(350px, 1fr) minmax(350px, 1fr) minmax(350px, 1fr);
             gap: 2rem;
             justify-content: center;
         }
+
         .result-section {
             background: white;
             padding: 2rem;
@@ -49,28 +54,60 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
-            min-height: 450px; /* Ensure consistent height */
+            min-height: 450px;
         }
+
         .titles, .results {
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+
         }
+
+       
+
+        .results ul {
+            padding-left: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .results li {
+            list-style-type: disc;
+            color: #333;
+        }
+
+        .results li strong {
+            color: #000;
+        }
+
+        .results .no-data-msg {
+            color: #888;
+            font-style: italic;
+        }
+
+        /* (Style ส่วนที่เหลือเหมือนเดิม) */
+
         .titles p, .results p {
             margin: 0;
             font-size: 1rem;
             color: #333;
         }
+
         .results p span {
             font-weight: bold;
             color: #2c3e50;
         }
+
         .comment-section {
             padding: 1.5rem;
             background: white;
             border-radius: 10px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
+
         .comment-section textarea {
             width: 100%;
             min-height: 100px;
@@ -80,12 +117,15 @@
             border-radius: 6px;
             font-size: 1rem;
         }
+
         .comment-section .buttons {
             display: flex;
             gap: 1.5rem;
             justify-content: center;
         }
+
         .comment-section .buttons button {
+
             padding: 0.75rem 1.5rem;
             background: #6b48ff;
             color: white;
@@ -94,11 +134,15 @@
             cursor: pointer;
             font-size: 1.2rem;
             transition: background 0.3s;
+
         }
+
         .comment-section .buttons button:hover {
             background: #5538cc;
         }
+
         .back-button {
+
             display: block;
             margin: 0 auto;
             padding: 1rem 2rem;
@@ -110,64 +154,87 @@
             font-size: 1.1rem;
             transition: background 0.3s;
         }
+
         .back-button:hover {
             background: #5538cc;
-        }
+}
+
         @media (max-width: 1024px) {
             .results-grid {
-                grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+                grid-template-columns: 1fr; 
             }
         }
+
         @media (max-width: 768px) {
             .results-grid {
                 grid-template-columns: 1fr;
             }
+
             .result-section {
                 grid-template-columns: 1fr;
                 min-height: auto;
             }
+
         }
-    </style>
+
+        </style>
+
 </head>
 <body>
     <nav>
         <a href="#" id="loginLogoutLink" data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</a>
         <a href="#" id="signupAccountLink" data-th="สมัครสมาชิก" data-en="Sign Up">สมัครสมาชิก</a>
         <select id="languageSelector">
-            <option value="th">ไทย</option>
-            <option value="en">English</option>
+            <option value="th" data-th="ไทย" data-en="Thai">ไทย</option>
+            <option value="en" data-th="อังกฤษ" data-en="English">English</option>
         </select>
     </nav>
+
     <div class="results-container">
         <h2 data-th="ผลการค้นหา" data-en="Search Results">ผลการค้นหา</h2>
         <div class="results-grid">
-            <div class="result-section">
+
+                                                <div class="result-section">
                 <h3 data-th="ข้อมูลที่คุณกรอก" data-en="Your Inputs">ข้อมูลที่คุณกรอก</h3>
                 <div class="results">
-                    <p data-th="คุณภาพโดยรวม:" data-en="Overall Quality:"><span id="OverallQualResult1">-</span></p>
-                    <p data-th="พื้นที่ชั้นใต้ดิน:" data-en="Basement Area:"><span id="TotalBsmtSFResult1">-</span> ตร.ฟุต</p>
-                    <p data-th="พื้นที่ที่ดิน:" data-en="Lot Area:"><span id="LotAreaResult1">-</span> ตร.ฟุต</p>
-                    <p data-th="ความจุโรงรถ:" data-en="Garage Capacity:"><span id="GarageCarsResult1">-</span> คัน</p>
-                    <p data-th="จำนวนเตาผิง:" data-en="Fireplaces:"><span id="FireplacesResult1">-</span></p>
-                    <p data-th="จำนวนห้องนอน:" data-en="Bedrooms:"><span id="BedroomAbvGrResult1">-</span></p>
-                    <p data-th="พื้นที่อยู่อาศัย:" data-en="Living Area:"><span id="GrLivAreaResult1">-</span> ตร.ฟุต</p>
-                    <p data-th="จำนวนห้องน้ำ:" data-en="Bathrooms:"><span id="FullBathResult1">-</span></p>
-                    <p data-th="ย่านที่ตั้ง:" data-en="Neighborhood:"><span id="NeighborhoodResult1">-</span></p>
+
+                                       
+
+                                                            <div id="user-inputs-display">
+                        <p>-(Loading user inputs...)-</p>
                     </div>
+                </div>
             </div>
-            <div class="result-section">
-                <h3 data-th="ผลการทำนาย" data-en="Prediction Results">ผลการทำนาย</h3>
+
+
+
+                                                            <div class="result-section">
+                <h3 data-th="คุณสมบัติที่แนะนำ" data-en="Advice Feature Values">สิ่งที่โมเดลเติมให้</h3>
                 <div class="results">
-                    <p data-th="งบประมาณที่คุณเลือก:" data-en="Your Budget:">
-                        <span id="budgetDisplay">-</span> USD</p>
+                                        <div id="imputed-values-display">
+                        <p>-(Loading imputed values...)-</p>
+                    </div>
+                </div>
+            </div>
+                                                <div class="result-section">
+
+                <h3 data-th="ผลการทำนาย" data-en="Prediction Results">ผลการทำนาย</h3>
+
+                <div class="results">
+                                        <p data-th="ช่วงราคาที่ใช้:" data-en="Price Range Used:">ช่วงราคาที่ใช้:</p>
+                    <p><span id="final-price-range-display">-</span></p>
 
 
-                    <p data-th="ราคาที่ทำนายได้:" data-en="Predicted Price:">ราคาที่ทำนายได้:</p>
+                                        <p data-th="ราคาที่ทำนายได้:" data-en="Predicted Price:">ราคาที่ทำนายได้:</p>
                     <p><b><span id="predictedPriceDisplay">-</span> USD</b></p>
                 </div>
             </div>
         </div>
-        <div class="comment-section">
+
+
+
+                                <div class="comment-section">
+
             <textarea id="comment-textarea" placeholder="Enter your comment here..." data-th="ใส่ความคิดเห็นของคุณที่นี่..." data-en="Enter your comment here..."></textarea>
             <div class="buttons">
                 <button id="send-comment-btn" data-th="ส่ง" data-en="Send">ส่ง</button>
@@ -177,6 +244,5 @@
         </div>
         <a href="{{ url_for('home_page') }}" class="back-button" data-th="กลับไปที่หน้าค้นหา" data-en="Back to Search">กลับไปที่หน้าค้นหา</a>
     </div>
-<script src="{{ url_for('static', filename='script.js', v='1.1') }}" defer></script>
-</body>
+<script src="{{ url_for('static', filename='script.js', v='1.2.1') }}" defer></script> </body>
 </html>

@@ -5,6 +5,11 @@
     font-family: Arial, sans-serif;
 }
 
+.comment-section .buttons button.active {
+    background-color: #4a00e0; /* สีเข้มขึ้น (ตัวอย่าง) */
+    color: white;
+    border-color: #4a00e0;
+}
 body {
     display: flex;
     justify-content: center;

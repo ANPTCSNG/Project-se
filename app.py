@@ -18,7 +18,7 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 
 #app = Flask(__name__)
 bcrypt = Bcrypt(app)
-CORS(app)
+CORS(app, origins=["https://projectse-9dgx.onrender.com"])
 # ---------------------------------------------- MongoDB Setup ---
 #MONGO_URI = "mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
 

@@ -104,12 +104,7 @@ for f in TRAINED_COLUMNS:
 #  ----------------------------------------------WEB PAGE ROUTES (ส่วนสำหรับเปิดหน้าเว็บ HTML)
 @app.route('/')
 def index_page():
-    if 'user_id' not in session:
-        # ยังไม่ได้ login → redirect ไป login
-        return redirect(url_for('login_page', next=request.path))
     return render_template('index.html')
-    # เมื่อเข้าเว็บครั้งแรก ให้ไปที่หน้า login
-    #return render_template('index.html')
 
 @app.route('/home')
 def home_page():
@@ -214,6 +209,12 @@ def login():
 # -----------------------------------------------------------------PREDICTION API ---
 @app.route('/api/predict', methods=['POST'])
 def predict():
+    if 'user_id' not in session:
+        return jsonify({   
+            'error': 'Unauthorized', 
+            'message': 'กรุณา login ก่อนใช้งาน',
+            'redirect_url': url_for('login_page') # บอก script.js ว่าให้เด้งไปหน้านี้
+        }), 401
     # --- เช็คว่าโมเดลโหลดเรียบร้อย ---
     if price_model is None or imputer_model is None:
         return jsonify({'error': 'Model is not loaded'}), 500

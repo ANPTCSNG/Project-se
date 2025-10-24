@@ -198,13 +198,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchForm = document.getElementById('searchForm');
     if (searchForm) {
     
-        if (localStorage.getItem('isLoggedIn') !== 'true') {
-            alert('กรุณาเข้าสู่ระบบเพื่อใช้งาน');
-            window.location.href = "/login"; 
-        }
         
         searchForm.addEventListener('submit', function(event) {
             event.preventDefault();
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                alert('กรุณาเข้าสู่ระบบเพื่อใช้งาน');
+                window.location.href = "/login";
+                return; 
+            }
             // 1. เก็บค่าที่ User กรอก (สำหรับส่ง Feedback)
             const original_form_inputs = {
                 OverallQual: document.getElementById('OverallQual').value,

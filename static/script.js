@@ -1,4 +1,7 @@
 // ---------------------------------- 1. Global Utility Functions (นอก DOMContentLoaded) ---
+const API_BASE_URL = window.location.hostname.includes("localhost")
+    ? "http://127.0.0.1:5000"
+    : "https://your-staging-api.onrender.com";
 
 function setContent(id, value) {
     const el = document.getElementById(id);
@@ -6,8 +9,9 @@ function setContent(id, value) {
         el.textContent = value;
         return true;
     }
-    console.warn(`Element with ID '${id}' not found.`); // เพิ่มคำเตือน
-    return false;
+    if (!el && window.location.hostname.includes("localhost")) {
+    console.warn(`Element with ID '${id}' not found.`);
+    }
 }
 
 function showModal(message) {
@@ -106,7 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', function(e) {
             if (localStorage.getItem('isLoggedIn') === 'true' && (this.id === 'logoutButton' || this.getAttribute('data-en') === 'Logout')) {
                 e.preventDefault();
-                localStorage.clear(); 
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("username");
+                localStorage.removeItem("user_id");
+                localStorage.removeItem("email");
+                localStorage.removeItem("prediction_results"); // ลบผลลัพธ์เก่าด้วย
                 alert('คุณออกจากระบบสำเร็จ');
                 window.location.href = "/login"; 
             }
@@ -123,7 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            fetch("http://127.0.0.1:5000/api/signup", {
+          //  fetch("http://127.0.0.1:5000/api/signup", {
+                fetch(`${API_BASE_URL}/api/signup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, email, password })
@@ -153,7 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            fetch("http://127.0.0.1:5000/api/login", {
+            //fetch("http://127.0.0.1:5000/api/login", {
+                fetch(`${API_BASE_URL}/api/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
@@ -242,7 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 price_range: original_form_range // ส่ง price range
             };
             
-            fetch("http://127.0.0.1:5000/api/predict", {
+            //fetch("http://127.0.0.1:5000/api/predict", {
+                fetch(`${API_BASE_URL}/api/predict`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -420,7 +431,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 // ส่ง "Rating" ไปยัง Server ทันที
-                fetch('/api/feedback', { // (ใช้ Endpoint เดิม แต่ส่งข้อมูลไม่เหมือนเดิม)
+                //fetch('/api/feedback', { // (ใช้ Endpoint เดิม แต่ส่งข้อมูลไม่เหมือนเดิม)
+                fetch(`${API_BASE_URL}/api/feedback`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -456,7 +468,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 // ส่ง "Rating" ไปยัง Server ทันที
-                fetch('/api/feedback', { // (ใช้ Endpoint เดิม)
+                //fetch('/api/feedback', { // (ใช้ Endpoint เดิม)
+                fetch(`${API_BASE_URL}/api/feedback`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -497,7 +510,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 // ส่ง "Comment" ไปยัง Server ทันที
-                fetch('/api/feedback', { // (ใช้ Endpoint เดิม)
+                //fetch('/api/feedback', { // (ใช้ Endpoint เดิม)
+                fetch(`${API_BASE_URL}/api/feedback`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

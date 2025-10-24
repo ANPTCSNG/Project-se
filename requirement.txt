@@ -9,4 +9,4 @@ scikit-learn
 fastapi
 uvicorn
 gunicorn
-flask-bcrypt
+flask-bcrypt==1.0.1

@@ -10,6 +10,8 @@ from datetime import timezone
 import numpy as np
 from bson.errors import InvalidId
 from pymongo.errors import DuplicateKeyError
+import logging
+import os
 
 # ------------------------------------------APP & DB CONFIGURATION
 
@@ -17,8 +19,10 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 CORS(app)
 # ---------------------------------------------- MongoDB Setup ---
-MONGO_URI = "mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
+#MONGO_URI = "mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
+MONGO_URI = os.environ.get("MONGO_URI")
 DB_NAME = "house_price_app"
+logging.basicConfig(level=logging.INFO)
 
 try:
     client = MongoClient(MONGO_URI)
@@ -27,9 +31,11 @@ try:
     predictions_collection = db['predictions']
     feedbacks_collection = db['feedbacks']
     users_collection.create_index([("username", 1)], unique=True)
-    print("✅ Connected to MongoDB successfully.")
+
+    logging.info("✅ Connected to MongoDB successfully.")
 except Exception as e:
-    print(f"❌ ERROR: Could not connect to MongoDB. {e}")
+    logging.error(f"❌ ERROR: Could not connect to MongoDB. {e}")
+
 
 
 # ----------------------------------------------------LOAD MACHINE LEARNING MODEL
@@ -394,4 +400,5 @@ def handle_feedback():
     
 #----------------------------------RUN THE APP
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    if os.environ.get("FLASK_ENV") == "development":
+        app.run(debug=True, host="0.0.0.0", port=5000)

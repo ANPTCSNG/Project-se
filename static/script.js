@@ -1,7 +1,8 @@
 // ---------------------------------- 1. Global Utility Functions (นอก DOMContentLoaded) ---
-const API_BASE_URL = window.location.hostname.includes("localhost")
-    ? "http://127.0.0.1:5000"
-    : "https://your-staging-api.onrender.com";
+const API_BASE_URL = "https://projectse-9dgx.onrender.com";
+//window.location.hostname.includes("localhost")
+//  ? "http://127.0.0.1:5000"
+//    : "https://your-staging-api.onrender.com";
 
 function setContent(id, value) {
     const el = document.getElementById(id);

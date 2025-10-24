@@ -20,9 +20,14 @@ bcrypt = Bcrypt(app)
 CORS(app)
 # ---------------------------------------------- MongoDB Setup ---
 #MONGO_URI = "mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
+
 MONGO_URI = os.environ.get("MONGO_URI")
-DB_NAME = "house_price_app"
 logging.basicConfig(level=logging.INFO)
+if not MONGO_URI:
+    logging.error("❌ MONGO_URI environment variable is missing!")
+
+DB_NAME = "house_price_app"
+
 
 try:
     client = MongoClient(MONGO_URI)
@@ -400,5 +405,10 @@ def handle_feedback():
     
 #----------------------------------RUN THE APP
 if __name__ == '__main__':
-    if os.environ.get("FLASK_ENV") == "development":
-        app.run(debug=True, host="0.0.0.0", port=5000)
+
+    #if os.environ.get("FLASK_ENV") == "development":
+        #app.run(debug=True, host="0.0.0.0", port=5000)
+        port = int(os.environ.get("PORT", 5000))
+        debug_mode = os.environ.get("FLASK_ENV") == "development"
+        app.run(debug=debug_mode, host="0.0.0.0", port=port)
+        

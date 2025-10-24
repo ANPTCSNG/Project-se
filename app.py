@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from pymongo import MongoClient
@@ -12,13 +12,17 @@ from bson.errors import InvalidId
 from pymongo.errors import DuplicateKeyError
 import logging
 import os
+import secrets
 
+
+secret_key = secrets.token_hex(32)
+print(secret_key)
 # ------------------------------------------APP & DB CONFIGURATION
 app = Flask(__name__, static_folder="static", template_folder="templates")
-
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev_secret_key")
 #app = Flask(__name__)
 bcrypt = Bcrypt(app)
-CORS(app, origins=["https://projectse-9dgx.onrender.com"])
+CORS(app, origins=["https://projectse-9dgx.onrender.com"], supports_credentials=True)
 # ---------------------------------------------- MongoDB Setup ---
 #MONGO_URI = "mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
 
@@ -100,8 +104,12 @@ for f in TRAINED_COLUMNS:
 #  ----------------------------------------------WEB PAGE ROUTES (ส่วนสำหรับเปิดหน้าเว็บ HTML)
 @app.route('/')
 def index_page():
-    # เมื่อเข้าเว็บครั้งแรก ให้ไปที่หน้า login
+    if 'user_id' not in session:
+        # ยังไม่ได้ login → redirect ไป login
+        return redirect(url_for('login_page', next=request.path))
     return render_template('index.html')
+    # เมื่อเข้าเว็บครั้งแรก ให้ไปที่หน้า login
+    #return render_template('index.html')
 
 @app.route('/home')
 def home_page():
@@ -136,6 +144,10 @@ def results_page():
 @app.route('/user-account')
 def user_account_page():
     return render_template('user-account.html')
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login_page'))
 
 #  --------------------------------------------------API ENDPOINTS (ส่วนสำหรับรับส่งข้อมูล)
 # ----------------------------------------------------- AUTHENTICATION API ---
@@ -169,7 +181,7 @@ def signup():
     
     except Exception as e:
         return jsonify({'error': f'Registration failed: {e}'}), 500
-
+#* ----------------------------------------------------------------------- LOGIN API ---
 @app.route('/api/login', methods=['POST'])
 def login():
     """Endpoint สำหรับการเข้าสู่ระบบ"""
@@ -184,6 +196,9 @@ def login():
         user = users_collection.find_one({"username": username})
     
         if user and bcrypt.check_password_hash(user['password'], password):
+            session['user_id'] = str(user['_id'])
+            session['username'] = user['username']
+
             return jsonify({
                 'message': 'Login success', 
                 'user_id': str(user['_id']), 

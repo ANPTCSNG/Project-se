@@ -24,7 +24,6 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev_secret_key")
 bcrypt = Bcrypt(app)
 CORS(app, origins=["https://projectse-9dgx.onrender.com"], supports_credentials=True)
 # ---------------------------------------------- MongoDB Setup ---
-#MONGO_URI = "mongodb+srv://anapatch_db_user:BlaMuXAJulXku0hx@cluster1.gqsi4uc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
 
 MONGO_URI = os.environ.get("MONGO_URI")
 logging.basicConfig(level=logging.INFO)
@@ -206,7 +205,6 @@ def login():
         return jsonify({'error': f'Login failed: {e}'}), 500
 
 # --- --------------------------------------------------------------PREDICTION API ---
-# -----------------------------------------------------------------PREDICTION API ---
 @app.route('/api/predict', methods=['POST'])
 def predict():
     if 'user_id' not in session:
@@ -223,13 +221,13 @@ def predict():
     if data is None:
         return jsonify({'error': 'No input data provided'}), 400
 
-    # --- 1. รับ input ดิบจาก User ---
+    # --- รับ input ดิบจาก User ---
     feature_data = data.get('features')  # dict ของ 9 features (เช่น {'OverallQual': '8', 'LotArea': ''})
     price_range_input = data.get('price_range')  # string (เช่น "100001-200000" หรือ "")
     if not feature_data:
         return jsonify({'error': 'No features provided'}), 400
 
-    # --- 2. เตรียมข้อมูลสำหรับ Imputer (ช่องว่างจะถูกแทนที่ด้วย np.nan) ---
+    # --- เตรียมข้อมูลสำหรับ Imputer (ช่องว่างจะถูกแทนที่ด้วย np.nan) ---
     input_dict_for_model = {}
     for col in TRAINED_COLUMNS:
         val = feature_data.get(col)
@@ -247,11 +245,11 @@ def predict():
     input_df = pd.DataFrame([input_dict_for_model], columns=TRAINED_COLUMNS)
 
     try:
-        # --- 3. เติมค่าที่หายด้วย Imputer ---
+        # --- เติมค่าที่หายด้วย Imputer ---
         filled_array = imputer_model.transform(input_df)
         filled_df = pd.DataFrame(filled_array, columns=TRAINED_COLUMNS)
 
-        # --- 4. ทำนายราคาบ้าน (ต้องแน่ใจว่า Neighborhood เป็น int) ---
+        # --- ทำนายราคาบ้าน (ต้องแน่ใจว่า Neighborhood เป็น int) ---
         predict_df = filled_df.copy()
         predict_df['Neighborhood'] = predict_df['Neighborhood'].astype(int)
         
@@ -259,7 +257,7 @@ def predict():
         # ทำให้เป็น float ธรรมดา (ไม่ใช่ numpy float) เพื่อให้ JSON ทำงานง่าย
         pred_price = float(pred_price) 
 
-        # --- 5. [สำคัญ] แยกแยะข้อมูล User Input และ Imputed Values ---
+        # --- [สำคัญ] แยกแยะข้อมูล User Input และ Imputed Values ---
         
         user_inputs_display = {}    # Dict สำหรับเก็บ "สิ่งที่ผู้ใช้กรอก"
         imputed_values_display = {} # Dict สำหรับเก็บ "สิ่งที่โมเดลเติมให้"
@@ -291,13 +289,13 @@ def predict():
                 # (เราจะโชว์ค่าที่ user กรอกมาตรงๆ)
                 user_inputs_display[col] = original_val 
 
-        # --- 6. [สำคัญ] จัดการ "ช่วงราคา" ตามโจทย์ ---
+        # ---  [สำคัญ] จัดการ "ช่วงราคา" ตามโจทย์ ---
         
         final_price_range_used = "" # นี่คือ "ช่วงราคา" ที่จะแสดงผลตามโจทย์
         is_match = False # (เก็บไว้ใช้เฉยๆ)
 
         if price_range_input:
-            # --- 6a. ถ้า User "เลือก" ช่วงราคามา ---
+            # ---  ถ้า User "เลือก" ช่วงราคามา ---
             final_price_range_used = price_range_input
             # เพิ่มเข้าไปใน dict "สิ่งที่ผู้ใช้กรอก"
             user_inputs_display['PriceRange'] = price_range_input
@@ -311,8 +309,8 @@ def predict():
             elif final_price_range_used == "500000+" and pred_price > 500000: is_match = True
         
         else:
-            # --- 6b. ถ้า User "ไม่ได้เลือก" ช่วงราคา (เราต้องเติมให้) ---
-            # เราจะ "สร้าง" ช่วงราคาที่ตรงกับราคาที่ทำนายได้
+            # ---  ถ้า User "ไม่ได้เลือก" ช่วงราคา (เราต้องเติมให้) ---
+            #  "สร้าง" ช่วงราคาที่ตรงกับราคาที่ทำนายได้
             if pred_price <= 100000:
                 final_price_range_used = "0-100000"
             elif 100000 < pred_price <= 200000:
@@ -368,16 +366,14 @@ def handle_feedback():
         return jsonify({'error': 'Invalid user_id format'}), 400
 
     try:
-        # --- [ใหม่] สร้าง "Filter" (ตัวค้นหา) ---
-        #    นี่คือ "บริบท" หรือ "กุญแจ" ที่ใช้ระบุว่าเรากำลังพูดถึง
-        #    Feedback ของการทำนายครั้งไหน
-        #    เราจะใช้ข้อมูลบริบททั้งหมดที่ JavaScript ส่งมา (baseFeedbackPayload)
+        # --- สร้าง "Filter" (ตัวค้นหา) ---
+        #  ใช้ข้อมูลบริบททั้งหมดที่ JavaScript ส่งมา (baseFeedbackPayload)
         
         query_filter = {
             "user_id": user_object_id, 
             "predicted_price": data.get('predicted_price'),
             
-            # ใช้ข้อมูลดิบที่ user กรอกมา (จาก baseFeedbackPayload)
+            # ใช้ข้อมูลดิบที่ user กรอก (จาก baseFeedbackPayload)
             "overall_qual": data.get('OverallQual'),
             "price_range": data.get('price_range'),
             "total_bsmt_sf": data.get('TotalBsmtSF'),
@@ -390,8 +386,8 @@ def handle_feedback():
             "neighborhood": data.get('Neighborhood')
         }
 
-        # 2. --- [ใหม่] สร้าง "Update Payload" (ข้อมูลที่จะอัปเดต) ---
-        #    เราจะใช้ $set เพื่อ "ตั้งค่า" หรือ "เขียนทับ"
+        #สร้าง "Update Payload" (ข้อมูลที่จะอัปเดต) ---
+        #  $set เพื่อ "ตั้งค่า" หรือ "เขียนทับ"
         #    เฉพาะ field ที่ถูกส่งมาในครั้งนี้เท่านั้น (เช่น comment หรือ rating)
         
         update_payload = {

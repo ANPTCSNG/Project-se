@@ -1,4 +1,4 @@
-// ---------------------------------- 1. Global Utility Functions (นอก DOMContentLoaded) ---
+// ----------------------------------  Global Utility Functions (นอก DOMContentLoaded) ---
 const API_BASE_URL = "https://projectse-9dgx.onrender.com";
 //window.location.hostname.includes("localhost")
 //  ? "http://127.0.0.1:5000"
@@ -56,7 +56,7 @@ window.togglePassword = function() {
 }
 
 
-// ---------------------------------- 2. Main Logic Block (ใน DOMContentLoaded) ---
+// ---------------------------------- Main Logic Block (ใน DOMContentLoaded) ---
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -64,23 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavLinks();
     
     // Language Selector setup
-// (โค้ดใหม่ที่แก้ไขแล้ว)
 
     // --- Language Selector setup (FIXED) ---
 
-    // 1. สร้างฟังก์ชันสำหรับเปลี่ยนภาษา (แยกออกมา)
+    // สร้างฟังก์ชันสำหรับเปลี่ยนภาษา (แยกออกมา)
     function applyLanguage(lang) {
         document.querySelectorAll('[data-th], [data-en]').forEach(el => {
             const text = el.getAttribute(`data-${lang}`);
             if (text) {
                 
-                // [FIX 2] ตรวจสอบว่าเป็น input หรือ textarea หรือไม่
+                //  ตรวจสอบว่าเป็น input หรือ textarea หรือไม่
                 if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                     if (el.hasAttribute('placeholder')) {
                         el.placeholder = text;
                     }
                 } else {
-                    // ถ้าไม่ใช่ ก็ให้เปลี่ยน textContent ปกติ
+                    // ถ้าไม่ใช่ เปลี่ยน textContent ปกติ
                     el.textContent = text;
                 }
             }
@@ -89,24 +88,24 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('language', lang);
     }
 
-    // 2. ดึง Element ของ dropdown
+    //  ดึง Element ของ dropdown
     const languageSelector = document.getElementById('languageSelector');
     
     if (languageSelector) {
-        // 3. ใส่ Event Listener (เหมือนเดิม)
+        //. ใส่ Event Listener 
         languageSelector.addEventListener('change', function() {
             applyLanguage(this.value); // เรียกใช้ฟังก์ชัน
         });
         
-        // 4. ดึงภาษาที่เคยบันทึกไว้
+        // ดึงภาษาที่เคยบันทึกไว้
         const savedLang = localStorage.getItem('language') || 'th';
         languageSelector.value = savedLang;
         
-        // 5. [FIX 1] สั่งให้เปลี่ยนภาษา "ทันที" ตอนโหลดหน้าเว็บ
+        //  สั่งให้เปลี่ยนภาษา "ทันที" ตอนโหลดหน้าเว็บ
         applyLanguage(savedLang); 
     }
     
-    // Logout Event Listener (ต้องอยู่ใน DOMContentLoaded)
+    // Logout Event Listener (อยู่ใน DOMContentLoaded)
     document.querySelectorAll('#loginLogoutLink, #logoutButton').forEach(link => {
         link.addEventListener('click', function(e) {
             if (localStorage.getItem('isLoggedIn') === 'true' && (this.id === 'logoutButton' || this.getAttribute('data-en') === 'Logout')) {
@@ -206,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = "/login";
                 return; 
             }
-            // 1. เก็บค่าที่ User กรอก (สำหรับส่ง Feedback)
+            // เก็บค่าที่ User กรอก (สำหรับส่ง Feedback)
             const original_form_inputs = {
                 OverallQual: document.getElementById('OverallQual').value,
                 GrLivArea: document.getElementById('GrLivArea').value,
@@ -249,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            // 2. สร้าง Payload สำหรับส่งไป /api/predict
+            // สร้าง Payload สำหรับส่งไป /api/predict
             const payload = {
                 features: original_form_inputs, // ส่ง 9 features
                 price_range: original_form_range // ส่ง price range
@@ -269,10 +268,10 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
                 
-                // 3. [สำคัญ] ตรวจสอบ data structure ใหม่
+                // ตรวจสอบ data structure ใหม่
                 if (data.predicted_price !== undefined && data.user_inputs && data.imputed_values) {
                     
-                    // 4. [สำคัญ] สร้าง Object ที่จะเก็บใน Local Storage ใหม่
+                    //  สร้าง Object ที่จะเก็บใน Local Storage ใหม่
                     const resultsToStore = {
                         // ข้อมูลดิบจากฟอร์ม (สำหรับ Feedback)
                         original_form_inputs: original_form_inputs,
@@ -302,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------- จัดการหน้า Results (Features Display & Feedback) ---
     if (window.location.pathname.includes('results')) {
         
-        // 1. [สำคัญ] ดึงข้อมูลจาก Local Storage (โครงสร้างใหม่)
+        // ดึงข้อมูลจาก Local Storage (โครงสร้างใหม่)
         const storedResults = localStorage.getItem('prediction_results');
         if (!storedResults) {
             alert('ไม่พบข้อมูลการทำนาย กรุณาลองใหม่อีกครั้ง');
@@ -312,18 +311,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const resultsData = JSON.parse(storedResults);
 
-        // --- 2. [สำคัญ] แยกข้อมูลสำหรับ "แสดงผล" ---
+        // แยกข้อมูลสำหรับ "แสดงผล" ---
         const predictedPrice = parseFloat(resultsData.predicted_price);
         const userInputs = resultsData.user_inputs; // นี่คือ object (ข้อ 1)
         const imputedValues = resultsData.imputed_values; // นี่คือ object (ข้อ 2)
         const finalPriceRange = resultsData.final_price_range; // นี่คือ string (ข้อ 3)
         
-        // --- 3. [สำคัญ] แยกข้อมูลสำหรับ "ส่ง Feedback" (ต้องใช้ข้อมูลดิบ) ---
+        //  แยกข้อมูลสำหรับ "ส่ง Feedback" (ต้องใช้ข้อมูลดิบ) ---
         const originalInputsForFeedback = resultsData.original_form_inputs;
         const originalRangeForFeedback = resultsData.original_form_range;
 
         
-        // --- 4. [สำคัญ] สร้างฟังก์ชัน Helper เพื่อแสดงผล ---
+        //  สร้างฟังก์ชัน Helper เพื่อแสดงผล ---
 
         // Object สำหรับแปลงชื่อ Key เป็นภาษาไทย (เพิ่ม/แก้ไขได้ตามต้องการ)
         const featureNameMap = {
@@ -362,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let htmlContent = '<ul>';
             for (const key in dataObject) {
                 
-                // [FIX] ดึงชื่อที่ถูกต้องตามภาษา (th หรือ en)
+                //  ดึงชื่อที่ถูกต้องตามภาษา (th หรือ en)
                 const nameMapEntry = featureNameMap[key];
                 const displayName = (nameMapEntry && nameMapEntry[lang]) ? nameMapEntry[lang] : key; 
                 
@@ -373,16 +372,16 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = htmlContent;
         }
      
-        // --- 5. [สำคัญ] (แก้ไขใหม่) เรียกใช้ฟังก์ชัน และ "เพิ่ม" Event Listener ---
+        // ---  เรียกใช้ฟังก์ชัน และ "เพิ่ม" Event Listener ---
 
-        // 5a. ดึงภาษาที่บันทึกไว้ (จาก localStorage)
+        // ดึงภาษาที่บันทึกไว้ (จาก localStorage)
         const savedLang = localStorage.getItem('language') || 'th';
 
-        // 5b. แสดงผลครั้งแรก (ด้วยภาษาที่บันทึกไว้)
+        // แสดงผลครั้งแรก (ด้วยภาษาที่บันทึกไว้)
         populateDisplayList('user-inputs-display', userInputs, savedLang);
         populateDisplayList('imputed-values-display', imputedValues, savedLang);
         
-        // 5c. แสดงผลราคา (ส่วนนี้เหมือนเดิม)
+        // แสดงผลราคา (ส่วนนี้เหมือนเดิม)
         setContent('final-price-range-display', finalPriceRange || 'N/A');
         if (!isNaN(predictedPrice)) {
             setContent('predictedPriceDisplay', predictedPrice.toLocaleString('en-US', {
@@ -390,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
         }
 
-        // 5d. [FIX] เพิ่ม Listener ให้กับ dropdown *เฉพาะหน้านี้*
+        //  เพิ่ม Listener ให้กับ dropdown *เฉพาะหน้านี้*
         //    (Listener ตัวนี้จะทำงาน *เพิ่มเติม* จาก Listener ตัวหลัก)
         const languageSelectorOnResultPage = document.getElementById('languageSelector');
         if (languageSelectorOnResultPage) {
@@ -401,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 populateDisplayList('imputed-values-display', imputedValues, newLang);
             });
         }
-        // --- 6. [สำคัญ] แก้ไขระบบ Feedback ให้ใช้ข้อมูลที่ถูกต้อง ---
+        // --แก้ไขระบบ Feedback ให้ใช้ข้อมูลที่ถูกต้อง ---
         const sendBtn = document.getElementById('send-comment-btn');
         const likeBtn = document.getElementById('like-btn');
         const dislikeBtn = document.getElementById('dislike-btn');
@@ -411,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
             predicted_price: resultsData.predicted_price,
             user_id: localStorage.getItem('user_id'),
             
-            // ใช้ข้อมูลดิบที่ user กรอกมาจริงๆ (จากข้อ 3)
+            // ใช้ข้อมูลดิบที่ user กรอกมาจริงๆ 
             price_range: originalRangeForFeedback || '',
             OverallQual: originalInputsForFeedback.OverallQual || '',
             GrLivArea: originalInputsForFeedback.GrLivArea || '',
@@ -427,13 +426,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (likeBtn) {
             likeBtn.addEventListener('click', function() {
                 
-                // สร้าง Payload สำหรับ "Rating" เท่านั้น
+                // สร้าง Payload สำหรับ "Rating" 
                 const payload = {
                     ...baseFeedbackPayload, // เอาข้อมูลบริบทมาทั้งหมด
                     rating: 'like'         // เพิ่มแค่ "rating"
                 };
 
-                // ส่ง "Rating" ไปยัง Server ทันที
+                // ส่ง "Rating" ไปยัง Server 
                 //fetch('/api/feedback', { // (ใช้ Endpoint เดิม แต่ส่งข้อมูลไม่เหมือนเดิม)
                 fetch(`${API_BASE_URL}/api/feedback`, {
                     method: 'POST',
@@ -447,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(data => {
                     if (data.message) {
                         console.log('Rating saved!');
-                        // [UI] อัปเดตปุ่มให้ "สว่าง"
+                        // อัปเดตปุ่มให้ "สว่าง"
                         likeBtn.classList.add('active'); 
                         dislikeBtn.classList.remove('active');
                         // ไม่ต้อง disable ปุ่ม เพื่อให้ user เปลี่ยนใจได้
@@ -460,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 2. ปุ่ม "Dislike" 👎
+        //ปุ่ม "Dislike" 👎
         if (dislikeBtn) {
             dislikeBtn.addEventListener('click', function() {
                 

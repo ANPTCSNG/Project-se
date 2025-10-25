@@ -93,14 +93,14 @@ TRAINED_COLUMNS = [
     "FullBath",
     "Neighborhood"
   ]
-reverse_models = {}
-for f in TRAINED_COLUMNS:
-    try:
-        reverse_models[f] = joblib.load(f"ml_model/reverse_{f}.joblib")
-        print(f"Reverse Model for {f} loaded successfully.")
-    except FileNotFoundError:
-        print(f"ERROR: reverse_{f}.joblib not found.")
-        reverse_models[f] = None
+#reverse_models = {}
+#for f in TRAINED_COLUMNS:
+#    try:
+#        reverse_models[f] = joblib.load(f"ml_model/reverse_{f}.joblib")
+#        print(f"Reverse Model for {f} loaded successfully.")
+#    except FileNotFoundError:
+#        print(f"ERROR: reverse_{f}.joblib not found.")
+#        reverse_models[f] = None
 #  ----------------------------------------------WEB PAGE ROUTES (ส่วนสำหรับเปิดหน้าเว็บ HTML)
 @app.route('/')
 def index_page():
